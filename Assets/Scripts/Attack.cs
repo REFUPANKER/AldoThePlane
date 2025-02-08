@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -5,30 +6,23 @@ using UnityEngine.UI;
 
 public class Attack : MonoBehaviour
 {
-    [SerializeField] private Movement player;
     [SerializeField] private Animator anims;
     [SerializeField] private Transform cam;
     [SerializeField] private float raycastDistance = 100f;
 
     private GameObject lastTarget;
 
-    [Header("Skill Slots")]
-    [SerializeField] private bool[] SkillesEnabled = { false, false, false, false };
-    [SerializeField] private Image[] SkillSlots;
-    [SerializeField] private Color SkillActivatedColor;
-    [SerializeField] private TextMeshProUGUI[] SkillCooldownTexts;
-    [SerializeField] private float[] SkillCooldowns = { 0f, 4f, 12f, 16f };
-
     [Header("Skills")]
     [SerializeField] private Skill1 skill1;
     [SerializeField] private Skill2 skill2;
     [SerializeField] private Skill3 skill3;
 
+
     [Header("Normal Strike")]
     [SerializeField] private AnimationClip[] StrikeAnims;
     public int StrikeStack = 0;
     private float lastAttackTime;
-    [SerializeField] private float comboResetTime = 1.5f; // Kombo sıfırlama süresi
+    [SerializeField] private float comboResetTime = 1.5f;
 
     void Update()
     {
@@ -45,42 +39,20 @@ public class Attack : MonoBehaviour
             DeselectTarget();
         }
 
-        // Skill Usage
-        if (SkillesEnabled[3])
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) && !skill3.Active)
         {
-            Debug.Log("Use Skill 3");
-        }
-        else
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1) && !SkillesEnabled[1])
-            {
-                StartCoroutine(SkillSlotCoroutine(1));
-                skill1.Activate();
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha2) && !SkillesEnabled[2] && !SkillesEnabled[3])
-            {
-                StartCoroutine(SkillSlotCoroutine(2));
-                skill2.Activate();
-                skill2.Use();
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha3) && !SkillesEnabled[3])
-            {
-                StartCoroutine(SkillSlotCoroutine(3));
-                skill3.Activate();
-            }
+            skill1.Activate();
         }
 
-
-        // Strike
-        // TODO: CHECK FOR TARGET
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !SkillesEnabled[3] && SkillesEnabled[1] && lastTarget != null)
+        if (Input.GetKeyDown(KeyCode.Alpha2) && !skill3.Active)
         {
-            skill1.Use(lastTarget);
+            skill2.Activate();
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !SkillesEnabled[3] && !SkillesEnabled[1])
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            PerformStrike();
+            skill3.Activate();
         }
 
         if (Time.time - lastAttackTime > comboResetTime)
@@ -102,26 +74,6 @@ public class Attack : MonoBehaviour
     {
         yield return new WaitForSeconds(StrikeAnims[StrikeStack].length / 2);
         anims.SetFloat("StrikeIndex", StrikeStack);
-    }
-
-    IEnumerator SkillSlotCoroutine(int slot)
-    {
-        StartCoroutine(SkillCountdownText(slot, SkillCooldowns[slot]));
-        SkillesEnabled[slot] = true;
-        SkillSlots[slot].color = SkillActivatedColor;
-        yield return new WaitForSeconds(SkillCooldowns[slot]);
-        SkillSlots[slot].color = Color.white;
-        SkillesEnabled[slot] = false;
-    }
-
-    IEnumerator SkillCountdownText(int slot, float cooldown)
-    {
-        SkillCooldownTexts[slot].text = cooldown == 0 ? "" : cooldown.ToString();
-        yield return new WaitForSeconds(1);
-        if (cooldown > 0)
-        {
-            StartCoroutine(SkillCountdownText(slot, cooldown - 1));
-        }
     }
 
     void SelectTarget(RaycastHit hit)

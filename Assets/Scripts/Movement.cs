@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
@@ -6,14 +8,16 @@ public class Movement : MonoBehaviour
     [Header("Hareket Ayarları")]
     [SerializeField] private float runSpeed = 5f;
     [SerializeField] private float fastRunSpeed = 8f;
-    [SerializeField] private float gravity = -9.81f;
-    [SerializeField] private float jumpHeight = 1.5f;
+    public float gravity = -9.81f;
+    public float jumpHeight = 1.5f;
     public bool isMoving;
+    public bool isSpeedBoosted;
+    public bool CanMove = true;
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
-    [SerializeField] private CharacterController controller;
-    private Vector3 velocity;
+    public CharacterController controller;
+    public Vector3 velocity;
     private bool isGrounded;
 
     private bool isPaused = false;
@@ -65,7 +69,7 @@ public class Movement : MonoBehaviour
         if (move.magnitude > 1)
             move.Normalize(); // Prevents diagonal speed boost
 
-        float speed = Input.GetKey(KeyCode.LeftShift) ? fastRunSpeed : runSpeed;
+        float speed = isSpeedBoosted ? fastRunSpeed : runSpeed;
         controller.Move(move * speed * Time.deltaTime);
 
         animator.SetFloat("Velocity", move.magnitude * (speed / runSpeed));
@@ -129,4 +133,20 @@ public class Movement : MonoBehaviour
             Time.timeScale = 1f;
         }
     }
+
+    public void JumpToPoint(Vector3 point, float time)
+    {
+        Vector3 displacement = point - transform.position;
+        float horizontalDistance = new Vector3(displacement.x, 0, displacement.z).magnitude;
+        float verticalSpeed = Mathf.Sqrt(-4 * gravity * jumpHeight);
+        velocity = new Vector3(displacement.x / time, verticalSpeed, displacement.z / time);
+        StartCoroutine(ResetVelocityAfterTime(time));
+    }
+
+    private IEnumerator ResetVelocityAfterTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        velocity = Vector3.zero;
+    }
+
 }

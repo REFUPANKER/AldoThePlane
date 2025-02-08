@@ -4,26 +4,34 @@ using UnityEngine;
 
 public class Skill2 : SkillTemplate
 {
-    public Animation shields;
-    public override void Use()
-    {
-        base.Use();
-        shields.Play();
-    }
-    public override IEnumerator EnableActiveTime()
-    {
-        yield return base.EnableActiveTime();
-        Debug.Log("Shield off");
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
+    public Animation spinAnim;
+    public Transform shieldSholder;
+    public Movement player;
+    public Transform ShieldTrackPos;
 
+    public override void Activate()
+    {
+        if (!Active && !InCoolDown)
+        {
+            spinAnim.Play();
+            base.Activate();
+            shieldSholder.gameObject.SetActive(true);
+        }
     }
-
-    // Update is called once per frame
+    public override void OnActiveTimeEnd()
+    {
+        base.OnActiveTimeEnd();
+        spinAnim.Stop();
+        player.isSpeedBoosted = false;
+        shieldSholder.gameObject.SetActive(false);
+    }
     void Update()
     {
-
+        if (Active)
+        {
+            shieldSholder.transform.position = ShieldTrackPos.position;
+            player.isSpeedBoosted = true;
+        }
     }
+
 }

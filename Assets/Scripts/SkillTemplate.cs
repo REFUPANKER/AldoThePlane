@@ -1,37 +1,116 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
+/// <summary>
+/// make sure call base functions
+/// </summary>
 public class SkillTemplate : MonoBehaviour
 {
-    public bool InUse;
-    public float ActiveTime;
-    public float Cooldown;
-    private void ItsInUse()
-    {
-        if (InUse)
-            return;
-        InUse = true;
-        StartCoroutine(EnableActiveTime());
-    }
+    [Header("Parameters")]
+    public bool Active;
+    public bool InCoolDown;
+    [SerializeField] private float ActiveTime;
+    [SerializeField] private float Cooldown;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI UiText;
+    [SerializeField] private Image UltiSlot;
+    [SerializeField] private Color32 DisabledUltiColor = new Color32(50, 50, 50, 255);
+    [SerializeField] private Color32 ActivatedTextColor = new Color32(255, 180, 0, 255);
+
+    /// <summary>
+    /// Countdown variables
+    /// <br></br>_cd : Cooldown
+    /// <br></br>_at : Active time
+    /// </summary>
+    private float _cd, _at;
+
     public virtual void Activate()
     {
-        ItsInUse();
-        // setup skill
+        if (Active || InCoolDown)
+            return;
+        Active = true;
+        InCoolDown = true;
+        _cd = Cooldown;
+        _at = ActiveTime;
+        UiText.color = ActivatedTextColor;
+        SwitchUiState(Active);
+        StartCoroutine(EnableActiveTime());
     }
+
     public virtual IEnumerator EnableActiveTime()
     {
-        yield return new WaitForSeconds(ActiveTime);
-        InUse = false;
+        if (_at < 1)
+        {
+            Active = false;
+            UiText.color = Color.white;
+            OnActiveTimeEnd();
+            if (_cd > 0)
+            {
+                StartCoroutine(EnableCooldown());
+            }
+            else
+            {
+                InCoolDown = false;
+                SwitchUiState(InCoolDown);
+                UiText.text = "";
+                OnCoolDownEnd();
+            }
+            yield break;
+        }
+        UiText.text = _at.ToString();
+        _at--;
+        _cd--;
+        yield return new WaitForSeconds(1);
+        StartCoroutine(EnableActiveTime());
     }
 
-    public virtual void Use()
+    public virtual IEnumerator EnableCooldown()
     {
-        ItsInUse();
+        if (_cd < 1)
+        {
+            InCoolDown = false;
+            SwitchUiState(InCoolDown);
+            UiText.text = "";
+            OnCoolDownEnd();
+            yield break;
+        }
+        UiText.text = _cd.ToString();
+        _cd--;
+        yield return new WaitForSeconds(1);
+        StartCoroutine(EnableCooldown());
     }
 
-    public virtual void Use(GameObject target)
+    public void PassToCoolDown()
     {
-        ItsInUse();
+        _at = 0;
+    }
+
+    public virtual void OnActiveTimeEnd()
+    {
+
+    }
+
+    public virtual void OnCoolDownEnd()
+    {
+
+    }
+
+    /// <summary>
+    /// Change ulti slot color by cooldown status
+    /// </summary>
+    public void SwitchUiState(bool state)
+    {
+        if (state)
+        {
+            UltiSlot.color = DisabledUltiColor;
+        }
+        else
+        {
+            UltiSlot.color = Color.white;
+        }
     }
 }

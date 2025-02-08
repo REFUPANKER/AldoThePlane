@@ -4,33 +4,50 @@ using UnityEngine;
 
 public class Skill1 : SkillTemplate
 {
-    public ParticleSystem particles;
+    public Movement player;
+    public Transform cam;
+    public Attack attack;
+    public float attackDistance = 10f;
+    public ParticleSystem prtHand;
+    public ParticleSystem prtGroundHit;
     public Animator anim;
+    public AnimationClip punchAnim;
+
     public override void Activate()
     {
-        base.Activate();
-        particles.Play();
+        if (!Active && !InCoolDown)
+        {
+            prtHand.Play();
+            base.Activate();
+        }
     }
-    public override IEnumerator EnableActiveTime()
+
+    public override void OnActiveTimeEnd()
     {
-        yield return base.EnableActiveTime();
-        particles.Stop();
+        base.OnActiveTimeEnd();
+        if (!Active)
+        {
+            prtHand.Stop();
+            prtGroundHit.Play();
+            Active = true;
+        }
     }
-
-    public override void Use(GameObject target)
-    {
-        base.Use();
-        anim.SetTrigger("Ulti1");
-    }
-
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
     void Update()
     {
-
+        if (Active)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Ray ray = new Ray(cam.position, cam.forward);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, attackDistance))
+                {
+                    anim.SetTrigger("Ulti1");
+                    PassToCoolDown();
+                    player.JumpToPoint(hit.point, punchAnim.length);
+                }
+            }
+        }
     }
+
 }
