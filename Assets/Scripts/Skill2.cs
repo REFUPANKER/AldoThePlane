@@ -5,33 +5,45 @@ using UnityEngine;
 public class Skill2 : SkillTemplate
 {
     public Animation spinAnim;
-    public Transform shieldSholder;
+    public Transform shieldsHolder;
     public Movement player;
     public Transform ShieldTrackPos;
+    public DamageSphere sphere;
 
     public override void Activate()
     {
         if (!Active && !InCoolDown)
         {
             spinAnim.Play();
+            shieldsHolder.gameObject.SetActive(true);
+            sphere.gameObject.SetActive(true);
             base.Activate();
-            shieldSholder.gameObject.SetActive(true);
+            player.isSpeedBoosted = true;
         }
     }
     public override void OnActiveTimeEnd()
     {
         base.OnActiveTimeEnd();
-        spinAnim.Stop();
-        player.isSpeedBoosted = false;
-        shieldSholder.gameObject.SetActive(false);
+        if (!IsBlocked)
+        {
+            spinAnim.Stop();
+            player.isSpeedBoosted = false;
+            shieldsHolder.gameObject.SetActive(false);
+            sphere.Play(true);
+        }
     }
     void Update()
     {
         if (Active)
         {
-            shieldSholder.transform.position = ShieldTrackPos.position;
-            player.isSpeedBoosted = true;
+            shieldsHolder.transform.position = ShieldTrackPos.position;
         }
     }
-
+    
+    public override void OnBlocked()
+    {
+        spinAnim.Stop();
+        player.isSpeedBoosted = false;
+        shieldsHolder.gameObject.SetActive(false);
+    }
 }

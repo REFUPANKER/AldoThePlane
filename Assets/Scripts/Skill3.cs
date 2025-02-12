@@ -7,26 +7,62 @@ public class Skill3 : SkillTemplate
 {
     public Animation TargetsUI;
     public Color32 UiTargetSelectedColor = new Color32(20, 255, 40, 255);
-    public Image[] TargetsUiImages;
-    public bool TargetSelected = false;
+    public Image[] TargetsUiImages = new Image[5];
+
+    [Header("Enemies"), Tooltip("Auto Collecting on start")]
     public Transform enemiesHolder;
-    public EnemyDwarf[] enemies;
+    public Enemy[] enemies = new Enemy[5];
+
+    public Enemy target;
+    public bool TargetSelected = false;
+    public Movement player;
+
+    [Header("Morph")]
+    public GameObject playerObj;
+    public GameObject planeObj;
+    public ParticleSystem morphSmoke;
+    public bool morphCompleted = false;
+
+    public Skill1 disableSkill1;
+    public Skill2 disableSkill2;
+
+    public float AscendLimit = 5;
+    public int InAirState = 0;
+
+    [Header("Flight Speed")]
+    public float FlightSpeed = 4;
+    public float MaxSpeed = 40;
+    public float SpeedMultiplier = 0.1f;
+    private float _BaseSpeed = 4;
+
+    [Header("Hit to target point")]
+    public DamageSphere damageSphere;
+    public ParticleSystem groundHitParticles;
+
     void Start()
     {
-        enemies = enemiesHolder.GetComponentsInChildren<EnemyDwarf>();
-        if (enemies.Length >= TargetsUiImages.Length)
+        _BaseSpeed = FlightSpeed;
+    }
+
+    private void InitEnemies()
+    {
+        enemiesHolder.GetComponentsInChildren<Enemy>().CopyTo(enemies, 0);
+
+        for (int i = 0; i < TargetsUiImages.Length; i++)
         {
-            for (int i = 0; i < TargetsUiImages.Length; i++)
+            if (enemies[i] != null)
             {
                 TargetsUiImages[i].sprite = enemies[i].ThumbnailImage;
+                TargetsUiImages[i].color = enemies[i].health <= 0 ? Color.red : Color.white;
             }
         }
     }
 
     public override void Activate()
     {
-        if (!Active && !InCoolDown)
+        if (!Active && !InCoolDown && !TargetSelected)
         {
+            InitEnemies();
             TargetsUI.Play("HeroUltiPlane_UiTargets_In");
             base.Activate();
         }
@@ -34,18 +70,19 @@ public class Skill3 : SkillTemplate
 
     public override void OnActiveTimeEnd()
     {
-        base.OnActiveTimeEnd();
         if (!TargetSelected)
         {
             TargetsUI.Play("HeroUltiPlane_UiTargets_Out");
-            Active = false;
         }
+        Active = TargetSelected;
+        alpha3InputFix = false;
     }
 
+    Vector3 groundPoint;
     bool alpha3InputFix;
     void Update()
     {
-        if (!alpha3InputFix && Input.GetKeyUp(KeyCode.Alpha3))
+        if (Input.GetKeyUp(KeyCode.Alpha3))
         {
             alpha3InputFix = true;
         }
@@ -60,15 +97,108 @@ public class Skill3 : SkillTemplate
                 if (Input.GetKeyDown(KeyCode.Alpha5)) { SelectUiTarget(4); }
             }
         }
+
+        // --- FLIGHT---
+        if (TargetSelected && target != null)
+        {
+            player.transform.LookAt(new Vector3(target.pos.x, target.pos.y + 1, target.pos.z));
+        }
+        if (InAirState > 0)
+        {
+            groundPoint = new Vector3(player.transform.position.x, 0, player.transform.position.z);
+        }
+        switch (InAirState)
+        {
+            case 1:
+                if (morphCompleted && Vector3.Distance(player.transform.position, groundPoint) >= AscendLimit)
+                {
+                    player.velocity.y = 0;
+                    InAirState = 2;
+                }
+                break;
+            case 2:
+                float dif = Vector3.Distance(player.transform.position, target.transform.position);
+                if (planeObj.activeSelf && dif <= 1.5f)
+                {
+                    StartCoroutine(MorphTo(1));
+                }
+                if (dif <= 1)
+                {
+                    player.velocity = Vector3.zero;
+                    damageSphere.Play(true);
+                    groundHitParticles.Play();
+                    InAirState = 3;
+
+                }
+                else
+                {
+                    player.velocity = player.transform.forward;
+                    player.velocity *= FlightSpeed;
+                    FlightSpeed += SpeedMultiplier;
+                    FlightSpeed = Mathf.Clamp(FlightSpeed, _BaseSpeed, MaxSpeed);
+                }
+                break;
+            case 3:
+                FlightSpeed = _BaseSpeed;
+                InAirState = 0;
+
+                Active = false;
+                target = null;
+                TargetSelected = false;
+                disableSkill1.UnBlock();
+                disableSkill2.UnBlock();
+                UnBlock();
+                player.ApplyGravity = true;
+                player.CanMove = true;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// dont forget to start coroutine<br></br>
+    /// opt obj <br></br>
+    /// 1   player<br></br>
+    /// 2   plane
+    /// </summary>
+    /// <param name="opt"></param>
+    IEnumerator MorphTo(int opt)
+    {
+        morphCompleted = false;
+        morphSmoke.Play();
+        switch (opt)
+        {
+            case 1:
+                planeObj.SetActive(false);
+                playerObj.SetActive(true);
+                break;
+            case 2:
+                playerObj.SetActive(false);
+                planeObj.SetActive(true);
+                break;
+        }
+        yield return new WaitForSeconds(morphSmoke.main.duration / 3);
+        morphCompleted = true;
     }
 
     void SelectUiTarget(int index)
     {
-        PassToCoolDown();
-        TargetsUiImages[index].color = UiTargetSelectedColor;
-        TargetsUI.Play("HeroUltiPlane_UiTargets_Out");
-        TargetSelected = true;
-        Active = false;
-        Debug.Log((index+1) + " selected");
+        if (enemies[index] != null && enemies[index].health > 0)
+        {
+            alpha3InputFix = false;
+            this.Block();
+            disableSkill1.Block();
+            disableSkill2.Block();
+            PassToCoolDown();
+            TargetsUiImages[index].color = UiTargetSelectedColor;
+            TargetsUI.Play("HeroUltiPlane_UiTargets_Out");
+            target = enemies[index];
+            TargetSelected = true;
+            player.CanMove = false;
+            player.ApplyGravity = false;
+            // prepare to flight
+            InAirState = 1;
+            player.velocity.y = Mathf.Sqrt(-4f * player.gravity * player.jumpHeight);
+            StartCoroutine(MorphTo(2));
+        }
     }
 }

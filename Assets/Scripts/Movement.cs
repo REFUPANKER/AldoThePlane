@@ -13,6 +13,7 @@ public class Movement : MonoBehaviour
     public bool isMoving;
     public bool isSpeedBoosted;
     public bool CanMove = true;
+    public bool ApplyGravity = true;
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
@@ -59,38 +60,48 @@ public class Movement : MonoBehaviour
     {
         isGrounded = controller.isGrounded;
 
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-
-        Vector3 move = transform.right * moveX + transform.forward * moveZ;
-
-        isMoving = move.magnitude > 0.1f;
-
-        if (move.magnitude > 1)
-            move.Normalize(); // Prevents diagonal speed boost
-
-        float speed = isSpeedBoosted ? fastRunSpeed : runSpeed;
-        controller.Move(move * speed * Time.deltaTime);
-
-        animator.SetFloat("Velocity", move.magnitude * (speed / runSpeed));
-
-        if (isGrounded && velocity.y < 0)
+        if (CanMove)
         {
-            velocity.y = -2f;
-        }
+            float moveX = Input.GetAxis("Horizontal");
+            float moveZ = Input.GetAxis("Vertical");
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            Vector3 move = transform.right * moveX + transform.forward * moveZ;
+
+            isMoving = move.magnitude > 0.1f;
+
+            if (move.magnitude > 1)
+                move.Normalize(); // Prevents diagonal speed boost
+
+            float speed = isSpeedBoosted ? fastRunSpeed : runSpeed;
+            controller.Move(move * speed * Time.deltaTime);
+
+            animator.SetFloat("Velocity", move.magnitude * (speed / runSpeed));
+
+            if (isGrounded && velocity.y < 0)
+            {
+                velocity.y = -2f;
+            }
+
+            // jumping
+            // if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            // {
+            //     velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            // }
+        }
+        else
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            animator.SetFloat("Velocity", 0);
         }
-
-        velocity.y += gravity * Time.deltaTime;
+        if (ApplyGravity)
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
         controller.Move(velocity * Time.deltaTime);
     }
 
     private void RotateWithCamera()
     {
-        if (cameraTransform != null)
+        if (cameraTransform != null && CanMove)
         {
             Quaternion targetRotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
@@ -134,11 +145,15 @@ public class Movement : MonoBehaviour
         }
     }
 
+    public delegate void eOnLanded();
+    public event eOnLanded OnLanded;
+
     public void JumpToPoint(Vector3 point, float time)
     {
+        CanMove = false;
         Vector3 displacement = point - transform.position;
-        float horizontalDistance = new Vector3(displacement.x, 0, displacement.z).magnitude;
-        float verticalSpeed = Mathf.Sqrt(-4 * gravity * jumpHeight);
+        // float horizontalDistance = new Vector3(displacement.x, 0, displacement.z).magnitude;
+        float verticalSpeed = Mathf.Sqrt(-2 * gravity * jumpHeight);
         velocity = new Vector3(displacement.x / time, verticalSpeed, displacement.z / time);
         StartCoroutine(ResetVelocityAfterTime(time));
     }
@@ -147,6 +162,9 @@ public class Movement : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         velocity = Vector3.zero;
+        OnLanded?.Invoke();
+        yield return new WaitForSeconds(time);
+        CanMove = true;
     }
 
 }

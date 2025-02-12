@@ -12,6 +12,8 @@ public class SkillTemplate : MonoBehaviour
     [Header("Parameters")]
     public bool Active;
     public bool InCoolDown;
+    public bool IsBlocked;
+    public float Damage;
     [SerializeField] private float ActiveTime;
     [SerializeField] private float Cooldown;
 
@@ -89,21 +91,16 @@ public class SkillTemplate : MonoBehaviour
         _at = 0;
     }
 
-    public virtual void OnActiveTimeEnd()
-    {
+    public virtual void OnActiveTimeEnd() { }
 
-    }
-
-    public virtual void OnCoolDownEnd()
-    {
-
-    }
+    public virtual void OnCoolDownEnd() { }
 
     /// <summary>
     /// Change ulti slot color by cooldown status
     /// </summary>
     public void SwitchUiState(bool state)
     {
+        if (IsBlocked) { return; }
         if (state)
         {
             UltiSlot.color = DisabledUltiColor;
@@ -112,5 +109,28 @@ public class SkillTemplate : MonoBehaviour
         {
             UltiSlot.color = Color.white;
         }
+    }
+
+    public void Block()
+    {
+        IsBlocked = true;
+        OnBlocked();
+        if (!Active)
+        {
+            UltiSlot.color = DisabledUltiColor;
+        }
+    }
+
+    public void UnBlock()
+    {
+        IsBlocked = false;
+        if (!Active && _cd <= 0)
+        {
+            UltiSlot.color = Color.white;
+        }
+    }
+    public virtual void OnBlocked()
+    {
+
     }
 }
