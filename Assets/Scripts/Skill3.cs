@@ -23,8 +23,9 @@ public class Skill3 : SkillTemplate
     public ParticleSystem morphSmoke;
     public bool morphCompleted = false;
 
-    public Skill1 disableSkill1;
-    public Skill2 disableSkill2;
+    [Header("Block skills")]
+    public Skill1 dSkill1;
+    public Skill2 dSkill2;
 
     public float AscendLimit = 5;
     public int InAirState = 0;
@@ -124,8 +125,10 @@ public class Skill3 : SkillTemplate
                 }
                 if (dif <= 1)
                 {
+                    // APPLY DAMAGE
                     player.velocity = Vector3.zero;
                     damageSphere.Play(true);
+                    target.TakeDamage(Damage + dSkill1.DamageStack);
                     groundHitParticles.Play();
                     InAirState = 3;
 
@@ -145,8 +148,8 @@ public class Skill3 : SkillTemplate
                 Active = false;
                 target = null;
                 TargetSelected = false;
-                disableSkill1.UnBlock();
-                disableSkill2.UnBlock();
+                dSkill1.UnBlock();
+                dSkill2.UnBlock();
                 UnBlock();
                 player.ApplyGravity = true;
                 player.CanMove = true;
@@ -186,8 +189,8 @@ public class Skill3 : SkillTemplate
         {
             alpha3InputFix = false;
             this.Block();
-            disableSkill1.Block();
-            disableSkill2.Block();
+            dSkill1.Block();
+            dSkill2.Block();
             PassToCoolDown();
             TargetsUiImages[index].color = UiTargetSelectedColor;
             TargetsUI.Play("HeroUltiPlane_UiTargets_Out");

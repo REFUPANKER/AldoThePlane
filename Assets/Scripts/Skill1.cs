@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Skill1 : SkillTemplate
@@ -8,14 +9,20 @@ public class Skill1 : SkillTemplate
     public Transform cam;
     public Attack attack;
     public float attackDistance = 10f;
+
+    [Header("Damage Stack")]
+    public int DamageStack = 0;
+    public TextMeshProUGUI StackText;
+
     [Header("Particles")]
     public ParticleSystem prtHand;
     public ParticleSystem prtGroundHit;
+
     [Header("Animations")]
     public Animator anim;
     public float punchAnimLength;
     public DamageSphere sphere;
-    
+
     bool InAttack;
     Enemy target;
     public override void Activate()
@@ -73,12 +80,40 @@ public class Skill1 : SkillTemplate
         sphere.Play(true);
         if (target != null)
         {
-            target.TakeDamage(Damage);
+            target.TakeDamage(Damage + DamageStack);
+            if (target.health <= 0)
+            {
+                switch (target.variation)
+                {
+                    case EnemyVariation.Dwarf:
+                    case EnemyVariation.BigDwarf:
+                        UpdateDamageStack(5);
+                        break;
+                    case EnemyVariation.Player:
+                    case EnemyVariation.Monster:
+                        UpdateDamageStack(10);
+                        break;
+                    case EnemyVariation.BigMonster:
+                    case EnemyVariation.Turtle:
+                        UpdateDamageStack(20);
+                        break;
+                    case EnemyVariation.Lord:
+                        UpdateDamageStack(30);
+                        break;
+                }
+            }
             target = null;
         }
     }
+
     public override void OnBlocked()
     {
         prtHand.Stop();
+    }
+
+    public void UpdateDamageStack(int addStack)
+    {
+        DamageStack += addStack;
+        StackText.text = DamageStack.ToString();
     }
 }

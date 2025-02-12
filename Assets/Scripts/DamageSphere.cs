@@ -13,6 +13,9 @@ public class DamageSphere : MonoBehaviour
 
     public float Damage;
 
+    public delegate void EnemyKilled(Enemy enemy);
+    public event EnemyKilled OnEnemyKilled;
+
     public void Play(bool disableAfterPlay)
     {
         gameObject.SetActive(true);
@@ -38,6 +41,12 @@ public class DamageSphere : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");
+        Enemy eScr = col.GetComponent<Enemy>();
+        if (eScr != null)
+        {
+            Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");
+            eScr.TakeDamage(Damage);
+            OnEnemyKilled?.Invoke(eScr);
+        }
     }
 }
