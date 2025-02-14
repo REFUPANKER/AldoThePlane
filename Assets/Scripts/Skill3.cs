@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +31,7 @@ public class Skill3 : SkillTemplate
     public float AscendLimit = 5;
     public int InAirState = 0;
 
-    [Header("Flight Speed")]
+    [Header("Flight Speed"), Tooltip("Effects Damage : adds half of it to damage")]
     public float FlightSpeed = 4;
     public float MaxSpeed = 40;
     public float SpeedMultiplier = 0.1f;
@@ -47,14 +48,14 @@ public class Skill3 : SkillTemplate
 
     private void InitEnemies()
     {
-        enemiesHolder.GetComponentsInChildren<Enemy>().CopyTo(enemies, 0);
-
+        enemiesHolder.GetComponentsInChildren<Enemy>(includeInactive: true).CopyTo(enemies, 0);
         for (int i = 0; i < TargetsUiImages.Length; i++)
         {
             if (enemies[i] != null)
             {
                 TargetsUiImages[i].sprite = enemies[i].ThumbnailImage;
-                TargetsUiImages[i].color = enemies[i].health <= 0 ? Color.red : Color.white;
+                TargetsUiImages[i].color = enemies[i].health <= 0 ||
+                            !enemies[i].gameObject.activeInHierarchy ? Color.red : Color.white;
             }
         }
     }
@@ -126,9 +127,10 @@ public class Skill3 : SkillTemplate
                 if (dif <= 1)
                 {
                     // APPLY DAMAGE
+                    player.controller.excludeLayers = LayerMask.GetMask("Nothing");
                     player.velocity = Vector3.zero;
                     damageSphere.Play(true);
-                    target.TakeDamage(Damage + dSkill1.DamageStack);
+                    target.TakeDamage(Damage + dSkill1.DamageStack + (FlightSpeed / 2));
                     groundHitParticles.Play();
                     InAirState = 3;
 
@@ -185,7 +187,7 @@ public class Skill3 : SkillTemplate
 
     void SelectUiTarget(int index)
     {
-        if (enemies[index] != null && enemies[index].health > 0)
+        if (enemies[index] != null && enemies[index].health > 0 && enemies[index].gameObject.activeInHierarchy)
         {
             alpha3InputFix = false;
             this.Block();
@@ -199,6 +201,7 @@ public class Skill3 : SkillTemplate
             player.CanMove = false;
             player.ApplyGravity = false;
             // prepare to flight
+            player.controller.excludeLayers = 1;
             InAirState = 1;
             player.velocity.y = Mathf.Sqrt(-4f * player.gravity * player.jumpHeight);
             StartCoroutine(MorphTo(2));

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class Attack : MonoBehaviour
 {
+    public LayerMask team2Layer;
     [SerializeField] private Animator anims;
     [SerializeField] private Transform cam;
     [SerializeField] private float raycastDistance = 100f;
@@ -30,7 +31,7 @@ public class Attack : MonoBehaviour
         RaycastHit hit;
 
         // Target Selecting
-        if (Physics.Raycast(ray, out hit, raycastDistance) && hit.collider.CompareTag("Target"))
+        if (Physics.Raycast(ray, out hit, raycastDistance, team2Layer))
         {
             SelectTarget(hit);
         }

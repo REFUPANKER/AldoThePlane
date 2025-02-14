@@ -5,7 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - CinemachineTarget
-  - Target
+  - Dwarf
   layers:
   - Default
   - TransparentFX
@@ -13,9 +13,9 @@ TagManager:
   - ground
   - Water
   - UI
-  - target
   - 
-  - 
+  - Team1
+  - Team2
   - 
   - 
   - 

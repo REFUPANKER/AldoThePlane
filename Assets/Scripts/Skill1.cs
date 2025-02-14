@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Skill1 : SkillTemplate
 {
+    public LayerMask team2Layer;
     public Movement player;
     public Transform cam;
     public Attack attack;
@@ -53,7 +54,7 @@ public class Skill1 : SkillTemplate
             {
                 Ray ray = new Ray(cam.position, cam.forward);
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, attackDistance) && hit.transform.tag == "Target")
+                if (Physics.Raycast(ray, out hit, attackDistance, team2Layer))
                 {
                     target = hit.transform.GetComponent<Enemy>();
                     anim.SetTrigger("Ulti1");
