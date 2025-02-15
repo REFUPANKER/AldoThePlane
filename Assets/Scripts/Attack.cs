@@ -6,18 +6,18 @@ using UnityEngine.UI;
 
 public class Attack : MonoBehaviour
 {
-    public LayerMask team2Layer;
+    [SerializeField] private LayerMask TeammateLayerMask;
+    [SerializeField] private LayerMask EnemyLayerMask;
     [SerializeField] private Animator anims;
     [SerializeField] private Transform cam;
     [SerializeField] private float raycastDistance = 100f;
 
-    private GameObject lastTarget;
+    [SerializeField] private GameObject lastTarget;
 
     [Header("Skills")]
     [SerializeField] private Skill1 skill1;
     [SerializeField] private Skill2 skill2;
     [SerializeField] private Skill3 skill3;
-
 
     [Header("Normal Strike")]
     [SerializeField] private AnimationClip[] StrikeAnims;
@@ -30,8 +30,8 @@ public class Attack : MonoBehaviour
         Ray ray = new Ray(cam.position, cam.forward);
         RaycastHit hit;
 
-        // Target Selecting
-        if (Physics.Raycast(ray, out hit, raycastDistance, team2Layer))
+
+        if (Physics.Raycast(ray, out hit, raycastDistance, TeammateLayerMask | EnemyLayerMask))
         {
             SelectTarget(hit);
         }
@@ -40,6 +40,14 @@ public class Attack : MonoBehaviour
             DeselectTarget();
         }
 
+
+        if (Input.GetMouseButtonDown(0) && lastTarget != null && !skill1.Active && !skill3.Active)
+        {
+            if (((1 << lastTarget.layer) & EnemyLayerMask.value) != 0)
+            {
+                Debug.Log("attacking");
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.Alpha1) && !skill3.Active)
         {
@@ -63,31 +71,18 @@ public class Attack : MonoBehaviour
         }
     }
 
-    void PerformStrike()
-    {
-        lastAttackTime = Time.time;
-        anims.SetTrigger("Attack");
-        StrikeStack = (StrikeStack + 1) % 3;
-        StartCoroutine(AdvanceCombo());
-    }
-
-    IEnumerator AdvanceCombo()
-    {
-        yield return new WaitForSeconds(StrikeAnims[StrikeStack].length / 2);
-        anims.SetFloat("StrikeIndex", StrikeStack);
-    }
-
     void SelectTarget(RaycastHit hit)
     {
         GameObject target = hit.transform.gameObject;
-        if (lastTarget != target)
-        {
-            DeselectTarget();
-        }
-
         Outline outline = target.GetComponent<Outline>();
+
         if (outline)
         {
+            if (lastTarget != target)
+            {
+                DeselectTarget();
+            }
+
             outline.enabled = true;
             lastTarget = target;
         }

@@ -8,7 +8,6 @@ public class Skill1 : SkillTemplate
     public LayerMask team2Layer;
     public Movement player;
     public Transform cam;
-    public Attack attack;
     public float attackDistance = 10f;
 
     [Header("Damage Stack")]
@@ -59,7 +58,7 @@ public class Skill1 : SkillTemplate
                     target = hit.transform.GetComponent<Enemy>();
                     anim.SetTrigger("Ulti1");
                     PassToCoolDown();
-                    player.JumpToPoint(hit.point, punchAnimLength);
+                    player.JumpToPoint(hit.transform.position, punchAnimLength);
                     InAttack = true;
                 }
             }
