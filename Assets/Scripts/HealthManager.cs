@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
+public class HealthManager : MonoBehaviour
 {
     public EnemyVariation variation;
     public Sprite ThumbnailImage;

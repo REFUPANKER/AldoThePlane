@@ -82,10 +82,9 @@ public class Attack : MonoBehaviour
             {
                 DeselectTarget();
             }
-
             outline.enabled = true;
-            lastTarget = target;
         }
+        lastTarget = target;
     }
 
     void DeselectTarget()

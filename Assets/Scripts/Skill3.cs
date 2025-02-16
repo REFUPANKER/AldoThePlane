@@ -12,9 +12,9 @@ public class Skill3 : SkillTemplate
 
     [Header("Enemies"), Tooltip("Auto Collecting on start")]
     public Transform enemiesHolder;
-    public Enemy[] enemies = new Enemy[5];
+    public HealthManager[] enemies = new HealthManager[5];
 
-    public Enemy target;
+    public HealthManager target;
     public bool TargetSelected = false;
     public Movement player;
 
@@ -48,7 +48,7 @@ public class Skill3 : SkillTemplate
 
     private void InitEnemies()
     {
-        enemiesHolder.GetComponentsInChildren<Enemy>(includeInactive: true).CopyTo(enemies, 0);
+        enemiesHolder.GetComponentsInChildren<HealthManager>(includeInactive: true).CopyTo(enemies, 0);
         for (int i = 0; i < TargetsUiImages.Length; i++)
         {
             if (enemies[i] != null)

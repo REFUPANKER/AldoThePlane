@@ -13,7 +13,7 @@ public class DamageSphere : MonoBehaviour
 
     public float Damage;
 
-    public delegate void EnemyKilled(Enemy enemy);
+    public delegate void EnemyKilled(HealthManager enemy);
     public event EnemyKilled OnEnemyKilled;
 
     public void Play(bool disableAfterPlay)
@@ -41,7 +41,7 @@ public class DamageSphere : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        Enemy eScr = col.GetComponent<Enemy>();
+        HealthManager eScr = col.GetComponent<HealthManager>();
         if (eScr != null)
         {
             Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");

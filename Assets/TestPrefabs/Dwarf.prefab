@@ -1698,12 +1698,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1060675507999507722}
-  - component: {fileID: 679257033623497166}
   - component: {fileID: 1482425670580967686}
   - component: {fileID: 7804320763800686140}
   - component: {fileID: 3930202647215793026}
+  - component: {fileID: 8942776552138353767}
   m_Layer: 8
-  m_Name: DwarfTeam2
+  m_Name: Dwarf
   m_TagString: Dwarf
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1727,25 +1727,6 @@ Transform:
   - {fileID: 8297475495765323208}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &679257033623497166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8162926624941000831}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2c3275b20a25084895a305c98cd4d4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  variation: 0
-  ThumbnailImage: {fileID: 21300000, guid: 8415812db68c8d04b87cb848c7d948ff, type: 3}
-  pos: {x: 0, y: 0, z: 0}
-  health: 100
-  healthBar: {fileID: 2433665380773823752}
-  cam: {fileID: 0}
-  ui: {fileID: 8297475495765323208}
 --- !u!95 &1482425670580967686
 Animator:
   serializedVersion: 5
@@ -1808,6 +1789,25 @@ CapsuleCollider:
   m_Height: 1.14
   m_Direction: 1
   m_Center: {x: 0, y: 1.04, z: 0}
+--- !u!114 &8942776552138353767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8162926624941000831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2c3275b20a25084895a305c98cd4d4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  variation: 0
+  ThumbnailImage: {fileID: 21300000, guid: 8415812db68c8d04b87cb848c7d948ff, type: 3}
+  pos: {x: 0, y: 0, z: 0}
+  health: 100
+  healthBar: {fileID: 2433665380773823752}
+  cam: {fileID: 0}
+  ui: {fileID: 8297475495765323208}
 --- !u!1 &8165015258791304539
 GameObject:
   m_ObjectHideFlags: 0

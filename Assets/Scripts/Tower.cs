@@ -53,8 +53,8 @@ public class Tower : MonoBehaviour
     IEnumerator AttackCoolDown()
     {
         canAttack = false;
-        TowerBullet newBullet = Instantiate(bullet);
-        newBullet.Follow(eye.position,target);
+        TowerBullet newBullet = Instantiate(bullet, transform);
+        newBullet.Follow(eye.position, target);
         yield return new WaitForSeconds(Cooldown);
         canAttack = true;
     }

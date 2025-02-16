@@ -24,7 +24,7 @@ public class Skill1 : SkillTemplate
     public DamageSphere sphere;
 
     bool InAttack;
-    Enemy target;
+    HealthManager target;
     public override void Activate()
     {
         if (!Active && !InCoolDown)
@@ -55,7 +55,7 @@ public class Skill1 : SkillTemplate
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, attackDistance, team2Layer))
                 {
-                    target = hit.transform.GetComponent<Enemy>();
+                    target = hit.transform.GetComponent<HealthManager>();
                     anim.SetTrigger("Ulti1");
                     PassToCoolDown();
                     player.JumpToPoint(hit.transform.position, punchAnimLength);
