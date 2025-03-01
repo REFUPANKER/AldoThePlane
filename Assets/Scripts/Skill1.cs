@@ -85,19 +85,19 @@ public class Skill1 : SkillTemplate
             {
                 switch (target.variation)
                 {
-                    case EnemyVariation.Dwarf:
-                    case EnemyVariation.BigDwarf:
+                    case Variation.Dwarf:
+                    case Variation.BigDwarf:
                         UpdateDamageStack(5);
                         break;
-                    case EnemyVariation.Player:
-                    case EnemyVariation.Monster:
+                    case Variation.Player:
+                    case Variation.Monster:
                         UpdateDamageStack(10);
                         break;
-                    case EnemyVariation.BigMonster:
-                    case EnemyVariation.Turtle:
+                    case Variation.BigMonster:
+                    case Variation.Turtle:
                         UpdateDamageStack(20);
                         break;
-                    case EnemyVariation.Lord:
+                    case Variation.Lord:
                         UpdateDamageStack(30);
                         break;
                 }

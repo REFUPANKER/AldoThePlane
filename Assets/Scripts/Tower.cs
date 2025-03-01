@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class Tower : MonoBehaviour
 {
+    /// <summary>
+    /// uses collider's include/exclude layer systems<br></br>
+    /// for example = in case of enemy layer is Team2<br></br>
+    /// Include layer : Team2Layer                   <br></br>
+    /// Exclude layer : everything except Team2Layer <br></br>
+    /// also switch objects holder's layer to opposite layer (not root > usually "parts" obj)
+    /// </summary>
     [Header("Target selecting settings")]
     public LayerMask TargetLayer;
 
@@ -28,7 +35,7 @@ public class Tower : MonoBehaviour
 
     void Update()
     {
-        if (target)
+        if (target && target.gameObject.activeSelf)
             FollowTarget();
         else
             ReturnToCenter();
@@ -77,6 +84,7 @@ public class Tower : MonoBehaviour
     void ReturnToCenter()
     {
         eye.localPosition = Vector3.Lerp(eye.localPosition, eyeCenter, Time.deltaTime * 2f);
+        TargetSelectedLine.SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
         TargetSelectedLine.gameObject.SetActive(false);
     }
 }

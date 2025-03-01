@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,8 @@ public class TowerBullet : MonoBehaviour
     public Transform _target;
     public float speed = 10f;
     public float FollowLimit = 30;
-    public float velocity = 1f;
+    private float _v = 1f;
+    public float velocityPerStep = 0.005f;
 
     private float basedis;
 
@@ -27,8 +29,8 @@ public class TowerBullet : MonoBehaviour
         {
             basedis = Vector3.Distance(_startPos, _target.position);
             transform.LookAt(_target);
-            transform.position = Vector3.MoveTowards(transform.position, _target.position, velocity * speed * Time.deltaTime);
-            velocity += 0.005f;
+            transform.position = Vector3.MoveTowards(transform.position, _target.position, _v * speed * Time.deltaTime);
+            _v = Math.Clamp(_v, velocityPerStep, speed);
             if (Vector3.Distance(transform.position, _target.position) <= 0.1f)
             {
                 HitTarget();

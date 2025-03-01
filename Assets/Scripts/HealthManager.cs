@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class HealthManager : MonoBehaviour
 {
-    public EnemyVariation variation;
+    public Variation variation;
     public Sprite ThumbnailImage;
     public Vector3 pos;
     [Header("Health")]
@@ -20,6 +20,7 @@ public class HealthManager : MonoBehaviour
     public Transform ui;
     void Start()
     {
+        cam = Camera.main.transform;
         _h = health;
         _hw = healthBar.rect.width;
     }

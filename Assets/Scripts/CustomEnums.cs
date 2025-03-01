@@ -1,4 +1,4 @@
-public enum EnemyVariation
+public enum Variation
 {
     Dwarf,
     BigDwarf,
