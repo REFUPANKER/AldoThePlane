@@ -12,9 +12,10 @@ public class Skill3 : SkillTemplate
 
     [Header("Enemies"), Tooltip("Auto Collecting on start")]
     public Transform enemiesHolder;
-    public HealthManager[] enemies = new HealthManager[5];
+    public HealthManager[] enemies = new HealthManager[] { };
 
     public HealthManager target;
+    private Vector3 lastPoint;
     public bool TargetSelected = false;
     public Movement player;
 
@@ -48,14 +49,20 @@ public class Skill3 : SkillTemplate
 
     private void InitEnemies()
     {
-        enemiesHolder.GetComponentsInChildren<HealthManager>(includeInactive: true).CopyTo(enemies, 0);
+        HealthManager[] es = enemiesHolder.GetComponentsInChildren<HealthManager>();
+        enemies = es;
         for (int i = 0; i < TargetsUiImages.Length; i++)
         {
-            if (enemies[i] != null)
+            if (i < es.Length)
             {
                 TargetsUiImages[i].sprite = enemies[i].ThumbnailImage;
                 TargetsUiImages[i].color = enemies[i].health <= 0 ||
                             !enemies[i].gameObject.activeInHierarchy ? Color.red : Color.white;
+            }
+            else
+            {
+                TargetsUiImages[i].sprite = null;
+                TargetsUiImages[i].color = Color.white;
             }
         }
     }
@@ -105,6 +112,10 @@ public class Skill3 : SkillTemplate
         {
             player.transform.LookAt(new Vector3(target.pos.x, target.pos.y + 1, target.pos.z));
         }
+        if (target != null)
+        {
+            lastPoint = target.pos;
+        }
         if (InAirState > 0)
         {
             groundPoint = new Vector3(player.transform.position.x, 0, player.transform.position.z);
@@ -119,7 +130,7 @@ public class Skill3 : SkillTemplate
                 }
                 break;
             case 2:
-                float dif = Vector3.Distance(player.transform.position, target.transform.position);
+                float dif = Vector3.Distance(player.transform.position, lastPoint);
                 if (planeObj.activeSelf && dif <= 1.5f)
                 {
                     StartCoroutine(MorphTo(1));
@@ -130,7 +141,10 @@ public class Skill3 : SkillTemplate
                     player.controller.excludeLayers = LayerMask.GetMask("Nothing");
                     player.velocity = Vector3.zero;
                     damageSphere.Play(true);
-                    target.TakeDamage(Damage + dSkill1.DamageStack + (FlightSpeed / 2));
+                    if (target != null)
+                    {
+                        target.TakeDamage(Damage + dSkill1.DamageStack + (FlightSpeed / 2));
+                    }
                     groundHitParticles.Play();
                     InAirState = 3;
 
@@ -187,7 +201,7 @@ public class Skill3 : SkillTemplate
 
     void SelectUiTarget(int index)
     {
-        if (enemies[index] != null && enemies[index].health > 0 && enemies[index].gameObject.activeInHierarchy)
+        if (index < enemies.Length && enemies[index].health > 0 && enemies[index].gameObject.activeInHierarchy)
         {
             alpha3InputFix = false;
             this.Block();

@@ -45,8 +45,10 @@ public class Tower : MonoBehaviour
     {
         if (((1 << col.gameObject.layer) & TargetLayer.value) == 0)
             return;
-
-        target = col.transform;
+        if (target == null)
+        {
+            target = col.transform;
+        }
         if (canAttack)
             StartCoroutine(AttackCoolDown());
     }

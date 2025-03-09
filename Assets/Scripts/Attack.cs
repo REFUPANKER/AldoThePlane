@@ -22,8 +22,7 @@ public class Attack : MonoBehaviour
     [Header("Normal Strike")]
     [SerializeField] private AnimationClip[] StrikeAnims;
     public int StrikeStack = 0;
-    private float lastAttackTime;
-    [SerializeField] private float comboResetTime = 1.5f;
+    public bool canAnimAttack;
 
     void Update()
     {
@@ -41,17 +40,23 @@ public class Attack : MonoBehaviour
         }
 
 
-        if (Input.GetMouseButtonDown(0) && lastTarget != null && !skill1.Active && !skill3.Active)
+        if (Input.GetMouseButtonDown(0) &&
+            lastTarget != null && !skill1.Active && !skill3.Active &&
+            ((1 << lastTarget.layer) & EnemyLayerMask.value) != 0
+            )
         {
-            if (((1 << lastTarget.layer) & EnemyLayerMask.value) != 0)
-            {
-                Debug.Log("attacking");
-            }
+            canAnimAttack = true;
+            StartCoroutine(attackAnims());
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            canAnimAttack = false;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1) && !skill3.Active)
         {
             skill1.Activate();
+            anims.ResetTrigger("Attack");
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2) && !skill3.Active)
@@ -62,12 +67,31 @@ public class Attack : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             skill3.Activate();
+            anims.ResetTrigger("Attack");
         }
+    }
 
-        if (Time.time - lastAttackTime > comboResetTime)
+    bool inanim = false;
+    IEnumerator attackAnims()
+    {
+        if (inanim) { yield break; }
+        inanim = true;
+        AnimationClip c = StrikeAnims[StrikeStack > 0 ? StrikeStack - 1 : 0];
+        anims.SetFloat("StrikeIndex", StrikeStack);
+        anims.SetTrigger("Attack");
+        StrikeStack = StrikeStack >= StrikeAnims.Length ? 0 : StrikeStack + 1;
+        yield return new WaitForSeconds(c.length * 0.7f);
+        inanim = false;
+        if (canAnimAttack)
+        {
+            StartCoroutine(attackAnims());
+        }
+        else
         {
             StrikeStack = 0;
             anims.SetFloat("StrikeIndex", StrikeStack);
+            anims.ResetTrigger("Attack");
+            canAnimAttack = false;
         }
     }
 

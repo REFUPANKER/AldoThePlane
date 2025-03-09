@@ -44,7 +44,12 @@ public class TowerBullet : MonoBehaviour
 
     void HitTarget()
     {
-        //Debug.Log($"Bullet reached : {damage}+{basedis} : {damage + basedis}");
         Destroy(gameObject);
+        HealthManager h = _target.GetComponent<HealthManager>();
+        if (h)
+        {
+            h.TakeDamage(damage);
+            // h.variation 
+        }
     }
 }

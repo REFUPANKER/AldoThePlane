@@ -15,6 +15,8 @@ public class HealthManager : MonoBehaviour
     private float _h;
     private float _hw;
 
+    public bool DestroyAfterDeath = true;
+
     [Header("Rotate ui to camera")]
     public Transform cam;
     public Transform ui;
@@ -47,7 +49,14 @@ public class HealthManager : MonoBehaviour
         }
         else
         {
-            gameObject.SetActive(false);
+            if (DestroyAfterDeath)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

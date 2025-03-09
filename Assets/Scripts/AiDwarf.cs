@@ -7,6 +7,8 @@ using UnityEngine.AI;
 public class AiDwarf : MonoBehaviour
 {
     private NavMeshAgent agent;
+    private Animator anims;
+
     public float enemyDetectionDistance = 10;
     public LayerMask EnemyLayer;
     public Transform EnemyCorridorTowersHolder;
@@ -16,6 +18,7 @@ public class AiDwarf : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        anims = GetComponent<Animator>();
         BackToTower();
     }
 
@@ -39,6 +42,14 @@ public class AiDwarf : MonoBehaviour
         else
         {
             BackToTower();
+        }
+        anims.SetFloat("velocity", agent.velocity.magnitude);
+    }
+    void LateUpdate()
+    {
+        if (target != null)
+        {
+            transform.LookAt(new Vector3(target.position.x, 0, target.position.z));
         }
     }
 
