@@ -16,7 +16,6 @@ public class Tower : MonoBehaviour
 
     [Header("Attack metrics")]
     public float Cooldown = 1f;
-    public float Damage = 25f;
     private bool canAttack = true;
     public TowerBullet bullet;
 

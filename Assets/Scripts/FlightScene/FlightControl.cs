@@ -2,14 +2,10 @@ using UnityEngine;
 
 public class FlightControl : MonoBehaviour
 {
+    public bool canMove = true;
     public float forwardSpeed = 20f;
     public float yawSpeed = 60f;
     public float pitchSpeed = 60f;
-
-    public Transform cameraTransform;
-    public float cameraSmoothTime = 0.1f;
-    public Vector3 cameraOffset = new Vector3(0, 2, -6);
-    private Vector3 cameraVelocity = Vector3.zero;
 
     public ParticleSystem[] weaponEffects;
     public ParticleSystem activeHitEffect;
@@ -19,17 +15,13 @@ public class FlightControl : MonoBehaviour
     {
         transform.position += transform.forward * forwardSpeed * Time.deltaTime;
 
-        float yawInput = Input.GetAxis("Horizontal");
-        float pitchInput = Input.GetAxis("Vertical");
-
-        transform.Rotate(pitchInput * pitchSpeed * Time.deltaTime, 0, 0, Space.Self);
-        transform.Rotate(0, 0, -yawInput * yawSpeed * Time.deltaTime, Space.Self);
-
-        if (cameraTransform != null)
+        if (canMove)
         {
-            Vector3 desiredPosition = transform.position + transform.rotation * cameraOffset;
-            cameraTransform.position = Vector3.SmoothDamp(cameraTransform.position, desiredPosition, ref cameraVelocity, cameraSmoothTime);
-            cameraTransform.rotation = Quaternion.Lerp(cameraTransform.rotation, transform.rotation, Time.deltaTime * 5f);
+            float yawInput = Input.GetAxis("Horizontal");
+            float pitchInput = Input.GetAxis("Vertical");
+
+            transform.Rotate(pitchInput * pitchSpeed * Time.deltaTime, 0, 0, Space.Self);
+            transform.Rotate(0, 0, -yawInput * yawSpeed * Time.deltaTime, Space.Self);
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && !isAttacking)

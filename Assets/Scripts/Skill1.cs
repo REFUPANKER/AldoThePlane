@@ -68,6 +68,38 @@ public class Skill1 : SkillTemplate
     void Start()
     {
         player.OnLanded += handleLanding;
+        sphere.OnEnemyKilled += enemyKilledWithSphere;
+    }
+
+    void enemyKilledWithSphere(HealthManager e)
+    {
+        if (e != null)
+        {
+            e.TakeDamage(Damage + DamageStack);
+            switch (e.variation)
+            {
+                case Variation.Dwarf:
+                    UpdateDamageStack(5);
+                    break;
+                case Variation.BigDwarf:
+                    UpdateDamageStack(10);
+                    break;
+                case Variation.Monster:
+                    UpdateDamageStack(15);
+                    break;
+                case Variation.Player:
+                    UpdateDamageStack(20);
+                    break;
+                case Variation.BigMonster:
+                    UpdateDamageStack(25);
+                    break;
+                case Variation.Turtle:
+                case Variation.Lord:
+                    UpdateDamageStack(30);
+                    break;
+            }
+            target = null;
+        }
     }
 
     void handleLanding()
@@ -78,36 +110,6 @@ public class Skill1 : SkillTemplate
         prtHand.Stop();
         prtGroundHit.Play();
         sphere.Play(true);
-        if (target != null)
-        {
-            target.TakeDamage(Damage + DamageStack);
-            if (target.health <= 0)
-            {
-                switch (target.variation)
-                {
-                    case Variation.Dwarf:
-                        UpdateDamageStack(5);
-                        break;
-                    case Variation.BigDwarf:
-                        UpdateDamageStack(10);
-                        break;
-                    case Variation.Monster:
-                        UpdateDamageStack(15);
-                        break;
-                    case Variation.Player:
-                        UpdateDamageStack(20);
-                        break;
-                    case Variation.BigMonster:
-                        UpdateDamageStack(25);
-                        break;
-                    case Variation.Turtle:
-                    case Variation.Lord:
-                        UpdateDamageStack(30);
-                        break;
-                }
-            }
-            target = null;
-        }
     }
 
     public override void OnBlocked()

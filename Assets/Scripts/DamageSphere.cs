@@ -44,9 +44,12 @@ public class DamageSphere : MonoBehaviour
         HealthManager eScr = col.GetComponent<HealthManager>();
         if (eScr != null)
         {
-            Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");
+            //Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");
             eScr.TakeDamage(Damage);
-            OnEnemyKilled?.Invoke(eScr);
+            if (eScr.health <= 0)
+            {
+                OnEnemyKilled?.Invoke(eScr);
+            }
         }
     }
 }

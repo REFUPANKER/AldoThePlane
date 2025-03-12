@@ -135,7 +135,7 @@ public class Skill3 : SkillTemplate
                 {
                     StartCoroutine(MorphTo(1));
                 }
-                if (dif <= 1)
+                if (dif <= 1.3f)
                 {
                     // APPLY DAMAGE
                     player.controller.excludeLayers = LayerMask.GetMask("Nothing");
@@ -147,7 +147,6 @@ public class Skill3 : SkillTemplate
                     }
                     groundHitParticles.Play();
                     InAirState = 3;
-
                 }
                 else
                 {

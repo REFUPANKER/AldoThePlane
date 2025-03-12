@@ -9,6 +9,10 @@ public class AiDwarf : MonoBehaviour
     private NavMeshAgent agent;
     private Animator anims;
 
+    public float attackCooldown = 5;
+    public float damage = 15;
+    bool canAttack = true;
+
     public float enemyDetectionDistance = 10;
     public LayerMask EnemyLayer;
     public Transform EnemyCorridorTowersHolder;
@@ -47,10 +51,29 @@ public class AiDwarf : MonoBehaviour
     }
     void LateUpdate()
     {
-        if (target != null)
+        if (target != null && Vector3.Distance(transform.position, target.position) <= enemyDetectionDistance / 2)
         {
-            transform.LookAt(new Vector3(target.position.x, 0, target.position.z));
+            Attack();
         }
+    }
+    void Attack()
+    {
+        if (!canAttack) { return; }
+        anims.ResetTrigger("attack");
+        anims.SetTrigger("attack");
+        canAttack = false;
+        transform.LookAt(new Vector3(target.position.x, 0, target.position.z));
+        HealthManager h = target.GetComponent<HealthManager>();
+        if (h != null)
+        {
+            h.TakeDamage(damage);
+        }
+        StartCoroutine(reactivateCanAttack());
+    }
+    IEnumerator reactivateCanAttack()
+    {
+        yield return new WaitForSeconds(attackCooldown);
+        canAttack = true;
     }
 
     void BackToTower()

@@ -41,7 +41,7 @@ public class HealthManager : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
-        health -= amount;
+        health -= (float)Math.Ceiling(amount);
         healthBar.sizeDelta = new Vector2(health > 0 ? health * 100 / _h / 100 * _hw : 0, healthBar.rect.height);
         if (health > 0)
         {
