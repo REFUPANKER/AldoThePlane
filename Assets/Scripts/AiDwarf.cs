@@ -51,7 +51,7 @@ public class AiDwarf : MonoBehaviour
     }
     void LateUpdate()
     {
-        if (target != null && Vector3.Distance(transform.position, target.position) <= enemyDetectionDistance / 2)
+        if (target != null && Vector3.Distance(transform.position, target.position) <= agent.stoppingDistance)
         {
             Attack();
         }
