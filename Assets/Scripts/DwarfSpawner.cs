@@ -16,6 +16,7 @@ public class DwarfSpawner : MonoBehaviour
 
     IEnumerator SpawnDwarfs()
     {
+        particles.Stop();
         particles.Play();
 
         for (int spawningIndex = 0; spawningIndex < dwarfs.Length; spawningIndex++)

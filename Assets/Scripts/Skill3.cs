@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class Skill3 : SkillTemplate
@@ -118,19 +119,21 @@ public class Skill3 : SkillTemplate
         }
         if (InAirState > 0)
         {
-            groundPoint = new Vector3(player.transform.position.x, 0, player.transform.position.z);
+            groundPoint = new Vector3(playerObj.transform.position.x, 0, playerObj.transform.position.z);
+            player.targetPoint = target.pos;
+            player.controller.Move(player.velocity * Time.deltaTime);
         }
         switch (InAirState)
         {
             case 1:
-                if (morphCompleted && Vector3.Distance(player.transform.position, groundPoint) >= AscendLimit)
+                if (morphCompleted && Vector3.Distance(planeObj.transform.position, groundPoint) >= AscendLimit)
                 {
                     player.velocity.y = 0;
                     InAirState = 2;
                 }
                 break;
             case 2:
-                float dif = Vector3.Distance(player.transform.position, lastPoint);
+                float dif = Vector3.Distance(planeObj.transform.position, lastPoint);
                 if (planeObj.activeSelf && dif <= 1.5f)
                 {
                     StartCoroutine(MorphTo(1));
@@ -168,6 +171,10 @@ public class Skill3 : SkillTemplate
                 UnBlock();
                 player.ApplyGravity = true;
                 player.CanMove = true;
+                if (!player.InFpsCam)
+                {
+                    player.agent.enabled = true;
+                }
                 break;
         }
     }
@@ -216,6 +223,7 @@ public class Skill3 : SkillTemplate
             // prepare to flight
             player.controller.excludeLayers = 1;
             InAirState = 1;
+            player.agent.enabled = false;
             player.velocity.y = Mathf.Sqrt(-4f * player.gravity * player.jumpHeight);
             StartCoroutine(MorphTo(2));
         }

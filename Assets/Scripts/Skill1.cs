@@ -51,18 +51,38 @@ public class Skill1 : SkillTemplate
         {
             if (Input.GetKeyDown(KeyCode.Mouse0) && !InAttack)
             {
-                Ray ray = new Ray(cam.position, cam.forward);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, attackDistance, team2Layer))
+                if (player.InFpsCam)
                 {
-                    target = hit.transform.GetComponent<HealthManager>();
-                    anim.SetTrigger("Ulti1");
-                    PassToCoolDown();
-                    player.JumpToPoint(hit.transform.position, punchAnimLength);
-                    InAttack = true;
+                    Ray ray = new Ray(cam.position, cam.forward);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, attackDistance, team2Layer))
+                    {
+                        SelectTarget(hit.transform);
+                    }
+                }
+                else
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, 100, team2Layer))
+                    {
+                        Collider[] cols = Physics.OverlapSphere(hit.point, 3, team2Layer);
+                        if (cols.Length > 0)
+                        {
+                            SelectTarget(cols[0].transform);
+                        }
+                    }
                 }
             }
         }
+    }
+    void SelectTarget(Transform hit)
+    {
+        target = hit.GetComponent<HealthManager>();
+        anim.SetTrigger("Ulti1");
+        PassToCoolDown();
+        player.JumpToPoint(hit.position, punchAnimLength);
+        InAttack = true;
     }
 
     void Start()

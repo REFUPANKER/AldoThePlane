@@ -6,11 +6,13 @@ using UnityEngine.UI;
 
 public class Attack : MonoBehaviour
 {
+    public Movement player;
     [SerializeField] private LayerMask TeammateLayerMask;
     [SerializeField] private LayerMask EnemyLayerMask;
     [SerializeField] private Animator anims;
     [SerializeField] private Transform cam;
-    [SerializeField] private float raycastDistance = 100f;
+    [SerializeField] private float raycastDistance = 10f;
+    [SerializeField] private float damage = 15;
 
     [SerializeField] private GameObject lastTarget;
 
@@ -26,21 +28,35 @@ public class Attack : MonoBehaviour
 
     void Update()
     {
-        Ray ray = new Ray(cam.position, cam.forward);
-        RaycastHit hit;
-
-
-        if (Physics.Raycast(ray, out hit, raycastDistance, TeammateLayerMask | EnemyLayerMask))
+        if (player.InFpsCam)
         {
-            SelectTarget(hit);
+            Ray ray = new Ray(cam.position, cam.forward);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, raycastDistance, TeammateLayerMask | EnemyLayerMask))
+            {
+                SelectTarget(hit.transform);
+            }
+            else
+            {
+                DeselectTarget();
+            }
         }
         else
         {
-            DeselectTarget();
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100, TeammateLayerMask | EnemyLayerMask))
+            {
+                SelectTarget(hit.transform);
+            }
+            else { DeselectTarget(); }
         }
 
 
-        if (Input.GetMouseButtonDown(0) &&
+
+
+
+        if (player.InFpsCam && Input.GetMouseButtonDown(0) &&
             lastTarget != null && !skill1.Active && !skill3.Active &&
             ((1 << lastTarget.layer) & EnemyLayerMask.value) != 0
             )
@@ -80,6 +96,11 @@ public class Attack : MonoBehaviour
         anims.SetFloat("StrikeIndex", StrikeStack);
         anims.SetTrigger("Attack");
         StrikeStack = StrikeStack >= StrikeAnims.Length ? 0 : StrikeStack + 1;
+        if (lastTarget)
+        {
+            HealthManager h = lastTarget.GetComponent<HealthManager>();
+            h.TakeDamage(damage);
+        }
         yield return new WaitForSeconds(c.length * 0.7f);
         inanim = false;
         if (canAnimAttack)
@@ -95,9 +116,9 @@ public class Attack : MonoBehaviour
         }
     }
 
-    void SelectTarget(RaycastHit hit)
+    void SelectTarget(Transform hit)
     {
-        GameObject target = hit.transform.gameObject;
+        GameObject target = hit.gameObject;
         Outline outline = target.GetComponent<Outline>();
 
         if (outline)

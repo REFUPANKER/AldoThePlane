@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Movement : MonoBehaviour
 {
-    [Header("Hareket Ayarları")]
+    [Header("Movement")]
     [SerializeField] private float runSpeed = 5f;
     [SerializeField] private float fastRunSpeed = 8f;
     public float gravity = -9.81f;
@@ -23,22 +24,26 @@ public class Movement : MonoBehaviour
 
     private bool isPaused = false;
 
-    [Header("Kamera ve Dönüş")]
+    [Header("Camera")]
+    public bool InFpsCam = true;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private float rotationSpeed = 10f;
     [SerializeField] private CinemachineBrain brainCam;
-
+    [SerializeField] private CinemachineVirtualCameraBase aimCam;
     [Header("Aim")]
-    [SerializeField] private CinemachineVirtualCameraBase vcam;
     [SerializeField] public KeyCode AimKey = KeyCode.Mouse1;
-    [SerializeField] private int aimPriority = 10;
     private bool isAiming = false;
-
+    [Header("TopDownControls")]
+    [SerializeField] private CinemachineVirtualCameraBase topdownCam;
+    public NavMeshAgent agent;
+    [SerializeField] private LayerMask groundlayer;
+    public Vector3 targetPoint;
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        agent.enabled = false;
     }
 
     private void Update()
@@ -50,10 +55,46 @@ public class Movement : MonoBehaviour
 
         if (!isPaused)
         {
-            Move();
-            RotateWithCamera();
-            Aiming();
+            if (InFpsCam)
+            {
+                Move();
+                RotateWithCamera();
+                Aiming();
+            }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, 100, groundlayer))
+                    {
+                        targetPoint = hit.point;
+                    }
+                }
+                if (agent.enabled)
+                {
+                    agent.SetDestination(targetPoint);
+                    animator.SetFloat("Velocity", agent.velocity.magnitude);
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                SwitchCameraMode();
+            }
+
         }
+    }
+    public void SwitchCameraMode()
+    {
+        targetPoint = transform.position;
+        aimCam.Priority = isAiming ? aimCam.Priority - 10 : aimCam.Priority;
+        topdownCam.Priority = !InFpsCam ? topdownCam.Priority - 10 : topdownCam.Priority + 10;
+        InFpsCam = !InFpsCam;
+        animator.SetFloat("Velocity", 0);
+        Cursor.lockState = InFpsCam ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = InFpsCam ? false : true;
+        agent.enabled = !InFpsCam;
     }
 
     private void Move()
@@ -70,7 +111,7 @@ public class Movement : MonoBehaviour
             isMoving = move.magnitude > 0.1f;
 
             if (move.magnitude > 1)
-                move.Normalize(); // Prevents diagonal speed boost
+                move.Normalize();
 
             float speed = isSpeedBoosted ? fastRunSpeed : runSpeed;
             controller.Move(move * speed * Time.deltaTime);
@@ -81,12 +122,6 @@ public class Movement : MonoBehaviour
             {
                 velocity.y = -2f;
             }
-
-            // jumping
-            // if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            // {
-            //     velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            // }
         }
         else
         {
@@ -114,13 +149,13 @@ public class Movement : MonoBehaviour
         {
             if (!isAiming)
             {
-                vcam.Priority += aimPriority;
+                aimCam.Priority += 10;
                 isAiming = true;
             }
         }
         else if (isAiming)
         {
-            vcam.Priority -= aimPriority;
+            aimCam.Priority -= 10;
             isAiming = false;
         }
     }
@@ -128,21 +163,10 @@ public class Movement : MonoBehaviour
     private void TogglePause()
     {
         isPaused = !isPaused;
-
-        if (isPaused)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            Time.timeScale = 0f;
-            brainCam.enabled = !brainCam.enabled;
-        }
-        else
-        {
-            brainCam.enabled = !brainCam.enabled;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            Time.timeScale = 1f;
-        }
+        Cursor.lockState = isPaused ? CursorLockMode.None : (InFpsCam ? CursorLockMode.Locked : CursorLockMode.None);
+        Cursor.visible = isPaused ? true : (InFpsCam ? false : true);
+        Time.timeScale = isPaused ? 0 : 1;
+        brainCam.enabled = !isPaused;
     }
 
     public delegate void eOnLanded();

@@ -18,6 +18,7 @@ public class Tower : MonoBehaviour
     public float Cooldown = 1f;
     private bool canAttack = true;
     public TowerBullet bullet;
+    public float range;
 
     [Header("Eye details")]
     public Transform eye;
@@ -38,24 +39,20 @@ public class Tower : MonoBehaviour
             FollowTarget();
         else
             ReturnToCenter();
-    }
 
-    void OnTriggerStay(Collider col)
-    {
-        if (((1 << col.gameObject.layer) & TargetLayer.value) == 0)
-            return;
-        if (target == null)
+        Collider[] cols = Physics.OverlapSphere(transform.position, range, TargetLayer);
+        if (cols.Length > 0)
         {
-            target = col.transform;
+            target = cols[0].transform;
+            if (canAttack)
+            {
+                StartCoroutine(AttackCoolDown());
+            }
         }
-        if (canAttack)
-            StartCoroutine(AttackCoolDown());
-    }
-
-    void OnTriggerExit(Collider col)
-    {
-        if (col.transform == target)
+        else
+        {
             target = null;
+        }
     }
 
     IEnumerator AttackCoolDown()
