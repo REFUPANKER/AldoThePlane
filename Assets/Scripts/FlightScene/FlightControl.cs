@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class FlightControl : MonoBehaviour
 {
@@ -37,6 +38,20 @@ public class FlightControl : MonoBehaviour
         if (isAttacking)
         {
             ShootRaycast();
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (Cursor.visible)
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            else
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
         }
     }
 

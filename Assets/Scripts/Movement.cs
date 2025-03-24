@@ -31,7 +31,8 @@ public class Movement : MonoBehaviour
     [SerializeField] private CinemachineBrain brainCam;
     [SerializeField] private CinemachineVirtualCameraBase aimCam;
     [Header("Aim")]
-    [SerializeField] public KeyCode AimKey = KeyCode.Mouse1;
+    public KeyCode AimKey = KeyCode.Mouse1;
+    [SerializeField] private ParticleSystem topdownPointParticle;
     private bool isAiming = false;
     [Header("TopDownControls")]
     [SerializeField] private CinemachineVirtualCameraBase topdownCam;
@@ -67,9 +68,15 @@ public class Movement : MonoBehaviour
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     RaycastHit hit;
-                    if (Physics.Raycast(ray, out hit, 100, groundlayer))
+                    if (Physics.Raycast(ray, out hit, 100)) // , groundlayer
                     {
-                        targetPoint = hit.point;
+                        if (hit.transform.gameObject.layer != LayerMask.NameToLayer("Team2") && hit.transform.gameObject.layer != LayerMask.NameToLayer("Team1"))
+                        {
+                            targetPoint = hit.point;
+                            ParticleSystem pointing = Instantiate(topdownPointParticle, topdownPointParticle.transform.parent);
+                            pointing.transform.position = hit.point;
+                            pointing.Play();
+                        }
                     }
                 }
                 if (agent.enabled)

@@ -11,11 +11,15 @@ public class HealthManager : MonoBehaviour
     public Vector3 pos;
     [Header("Health")]
     public float health = 100;
+    public float dhealth;
     public RectTransform healthBar;
-    private float _h;
+    public float _h;
     private float _hw;
 
     public bool DestroyAfterDeath = true;
+
+    public delegate void OnTakekDamage();
+    public event OnTakekDamage OnTakeDamage;
 
     [Header("Rotate ui to camera")]
     public Transform cam;
@@ -32,7 +36,8 @@ public class HealthManager : MonoBehaviour
         if (health > 0)
         {
             pos = transform.position;
-            if (Vector3.Distance(cam.position, transform.position) <= 10)
+            Collider[] c = Physics.OverlapSphere(transform.position, 5);
+            if (c.Length > 0)
             {
                 ui.LookAt(cam.position);
             }
@@ -43,6 +48,7 @@ public class HealthManager : MonoBehaviour
     {
         health -= (float)Math.Ceiling(amount);
         healthBar.sizeDelta = new Vector2(health > 0 ? health * 100 / _h / 100 * _hw : 0, healthBar.rect.height);
+        OnTakeDamage?.Invoke();
         if (health > 0)
         {
 

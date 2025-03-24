@@ -47,16 +47,20 @@ public class Attack : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100, TeammateLayerMask | EnemyLayerMask))
             {
-                SelectTarget(hit.transform);
+                if (Vector3.Distance(transform.position, hit.point) <= raycastDistance)
+                {
+                    SelectTarget(hit.transform);
+                }
             }
-            else { DeselectTarget(); }
+            else
+            { DeselectTarget(); }
         }
 
 
 
 
 
-        if (player.InFpsCam && Input.GetMouseButtonDown(0) &&
+        if (Input.GetMouseButtonDown(0) &&
             lastTarget != null && !skill1.Active && !skill3.Active &&
             ((1 << lastTarget.layer) & EnemyLayerMask.value) != 0
             )
@@ -99,7 +103,7 @@ public class Attack : MonoBehaviour
         if (lastTarget)
         {
             HealthManager h = lastTarget.GetComponent<HealthManager>();
-            h.TakeDamage(damage);
+            h?.TakeDamage(damage);
         }
         yield return new WaitForSeconds(c.length * 0.7f);
         inanim = false;
