@@ -1,8 +1,11 @@
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class FlightControl : MonoBehaviour
 {
+
+    public bool paused;
     public bool canMove = true;
     public float forwardSpeed = 20f;
     public float yawSpeed = 60f;
@@ -11,6 +14,10 @@ public class FlightControl : MonoBehaviour
     public ParticleSystem[] weaponEffects;
     public ParticleSystem activeHitEffect;
     private bool isAttacking = false;
+
+    public Transform planeA10;
+    public Transform planeB2;
+    public CinemachineFreeLook vcamPlaneB2;
 
     void Update()
     {
@@ -42,15 +49,23 @@ public class FlightControl : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-            if (Cursor.visible)
+            Cursor.visible = paused;
+            Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
+            paused = !paused;
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (planeA10.gameObject.activeSelf)
             {
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
+                planeA10.gameObject.SetActive(false);
+                planeB2.gameObject.SetActive(true);
+                vcamPlaneB2.Priority+=10;
             }
             else
             {
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                planeA10.gameObject.SetActive(true);
+                planeB2.gameObject.SetActive(false);
+                vcamPlaneB2.Priority-=10;
             }
         }
     }

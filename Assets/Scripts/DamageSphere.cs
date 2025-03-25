@@ -41,15 +41,13 @@ public class DamageSphere : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        HealthManager eScr = col.GetComponent<HealthManager>();
-        if (eScr != null)
+        Tower t = col.GetComponent<Tower>();
+        t?.TakeDamage(Damage);
+        HealthManager h = col.GetComponent<HealthManager>();
+        h?.TakeDamage(Damage);
+        if (h?.health <= 0)
         {
-            //Debug.Log($"OnTriggerEnter | {gameObject.name} Apply damage : {Damage} | tag : {col.tag}");
-            eScr.TakeDamage(Damage);
-            if (eScr.health <= 0)
-            {
-                OnEnemyKilled?.Invoke(eScr);
-            }
+            OnEnemyKilled?.Invoke(h);
         }
     }
 }

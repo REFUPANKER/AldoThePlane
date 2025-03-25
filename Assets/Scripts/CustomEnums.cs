@@ -6,5 +6,6 @@ public enum Variation
     Monster,
     BigMonster,
     Turtle,
-    Lord
+    Lord,
+    Tower
 }

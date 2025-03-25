@@ -104,6 +104,8 @@ public class Attack : MonoBehaviour
         {
             HealthManager h = lastTarget.GetComponent<HealthManager>();
             h?.TakeDamage(damage);
+            Tower t = lastTarget.GetComponent<Tower>();
+            t?.TakeDamage(damage);
         }
         yield return new WaitForSeconds(c.length * 0.7f);
         inanim = false;

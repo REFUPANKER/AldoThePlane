@@ -6,15 +6,21 @@ using UnityEngine.AI;
 
 public class Hero_MashaMovement : MonoBehaviour
 {
-    public bool IsPlayerControlled = false;
+    public bool IsPlayerControlled;
     public bool CanMove = true;
     public float AttackRadius = 5;
     public LayerMask TargetLayer;
 
+    [Header("Chasing")]
+    public Transform lastTarget;
+    public bool isChasing;
+    public float ChaseTimeout = 3;
+
     [Header("Damage management")]
-    public bool Escaping = false;
+    public bool Escaping;
     public HealthManager health;
     public float escapeCooldown;
+    public float safetyDistance = 7;
 
     [Header("Movement type setup")]
     public Animator anims;
@@ -31,6 +37,9 @@ public class Hero_MashaMovement : MonoBehaviour
     [Header("Targetting")]
     public Transform target;
 
+    [Header("Attack")]
+    public bool isAttacking;
+
     void Start()
     {
         health.OnTakeDamage += TookDamage;
@@ -39,7 +48,8 @@ public class Hero_MashaMovement : MonoBehaviour
         BackToTower();
     }
 
-    float lastDamageTaken = 0f;
+    float escapeStart = 0f;
+    float chaseStart = 0f;
     void TookDamage()
     {
         bool cHealth = health.health <= health._h / 2;
@@ -48,7 +58,7 @@ public class Hero_MashaMovement : MonoBehaviour
         {
             Escaping = true;
         }
-        lastDamageTaken = Time.time;
+        escapeStart = Time.time;
     }
 
     void Update()
@@ -63,7 +73,7 @@ public class Hero_MashaMovement : MonoBehaviour
             {
                 if (Escaping)
                 {
-                    if (Time.time - lastDamageTaken > escapeCooldown)
+                    if (Time.time - escapeStart > escapeCooldown || (target != null && Vector3.Distance(transform.position, target.position) >= safetyDistance))
                     {
                         Escaping = false;
                     }
@@ -74,26 +84,44 @@ public class Hero_MashaMovement : MonoBehaviour
                     Collider[] cols = Physics.OverlapSphere(transform.position, AttackRadius, TargetLayer);
                     if (cols.Length > 0)
                     {
-                        if (target != null)
+                        lastTarget = target;
+                        target = cols[0].transform;
+                        int decision = Random.Range(0, 2);
+                        switch (decision)
                         {
-                            if (Vector3.Distance(transform.position, target.position) > AttackRadius)
-                            {
-                                target = cols[0].transform;
-                            }
-                        }
-                        else
-                        {
-                            target = cols[0].transform;
+                            case 0:
+                                if (lastTarget == target && !isChasing && target.name != "Parts" && !target.name.Contains("Tower"))
+                                {
+                                    chaseStart = Time.time;
+                                    isChasing = true;
+                                }
+                                break;
+                            case 1:
+                                if (!isAttacking)
+                                {
+                                    Debug.Log("Attack");
+                                    isAttacking = true;
+                                }
+                                break;
                         }
                     }
                     else
                     {
                         BackToTower();
                     }
-                    agent.SetDestination(target.position);
+                    if (target != null)
+                    {
+                        agent.SetDestination(target.position);
+                    }
 
+                    if (isChasing && Time.time - chaseStart > ChaseTimeout)
+                    {
+                        isChasing = false;
+                        Escaping = true;
+                        escapeStart = Time.time;
+                    }
 
-                    if (target != null && Vector3.Distance(transform.position, target.position) < AttackRadius)
+                    if (target != null && Vector3.Distance(transform.position, target.position) < AttackRadius / 2)
                     {
                         transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(target.position - transform.position), Time.deltaTime * 100f);
                     }

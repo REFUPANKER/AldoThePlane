@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tower : MonoBehaviour
 {
@@ -27,8 +28,14 @@ public class Tower : MonoBehaviour
     private Vector3 eyeCenter;
     private Transform target;
 
+    [Header("Health")]
+    public float Health;
+    public Slider healthbar;
+
     void Start()
     {
+        healthbar.maxValue = Health;
+        healthbar.value = Health;
         eyeCenter = eye.localPosition;
         TargetSelectedLine.gameObject.SetActive(false);
     }
@@ -84,5 +91,16 @@ public class Tower : MonoBehaviour
         eye.localPosition = Vector3.Lerp(eye.localPosition, eyeCenter, Time.deltaTime * 2f);
         TargetSelectedLine.SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
         TargetSelectedLine.gameObject.SetActive(false);
+    }
+
+
+    public void TakeDamage(float damage)
+    {
+        Health -= damage;
+        healthbar.value = Health;
+        if (Health <= 0)
+        {
+            Debug.Log("TOWER DOWN !!!");
+        }
     }
 }

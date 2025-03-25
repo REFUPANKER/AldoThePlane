@@ -63,11 +63,13 @@ public class AiDwarf : MonoBehaviour
         anims.SetTrigger("attack");
         canAttack = false;
         transform.LookAt(new Vector3(target.position.x, 0, target.position.z));
+
         HealthManager h = target.GetComponent<HealthManager>();
-        if (h != null)
-        {
-            h.TakeDamage(damage);
-        }
+        h?.TakeDamage(damage);
+
+        Tower t = target.GetComponent<Tower>();
+        t?.TakeDamage(damage);
+
         StartCoroutine(reactivateCanAttack());
     }
     IEnumerator reactivateCanAttack()
