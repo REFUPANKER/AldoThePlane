@@ -12,53 +12,61 @@ public class UltiAldo : NetworkBehaviour
     [Header("Switch transforms")]
     [SerializeField] Transform SwitchSource;
     [SerializeField] Transform SwitchTarget;
-    [SerializeField] ParticleSystem particles;
+    [SerializeField] ParticleSystem SwitchParticles;
     [Header("Variables")]
     public bool inUse = false;
     public int airState = 0;
     public float ascendLimit = 10;
-    public float ascendForce = 5;
+    public float ascendForce = 25;
     private float firstAltitude;
     public float flightSpeed = 25;
-    private float flightBoost = 0;
-    private float boostMultiplier = 0.01f;
+    public float flightBoost = 10;
+    public float boostMultiplier = 0.01f;
     private Vector3 v;
     [Header("Target Setup")]
     public Vector3 target;
     public CinemachineFreeLook FlightCam;
-    // default scale
-    private Vector3 dsSource, dsTarget;
 
+    public GameObject tailsHolder;
+
+    private NetworkVariable<bool> switched = new NetworkVariable<bool>(value: false, readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
 
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner) { return; }
-        dsSource = SwitchSource.lossyScale;
-        dsTarget = SwitchTarget.lossyScale;
-        UpdateScaleServerRpc(dsSource, Vector3.zero);
+        SwitchTarget.gameObject.SetActive(false);
     }
 
     [ServerRpc]
-    void UpdateScaleServerRpc(Vector3 d1, Vector3 d2)
+    void UServerRpc(bool s)
+    {
+        switched.Value = s;
+        UClientRpc(s);
+    }
+    [ClientRpc]
+    void UClientRpc(bool s)
+    {
+        if (IsOwner) { return; }
+        ApplySwitch(!s, s);
+    }
+    void CheckSwitch()
     {
         if (IsOwner)
         {
-            SwitchSource.localScale = d1;
-            SwitchTarget.localScale = d2;
+            ApplySwitch(switched.Value, !switched.Value);
+            UServerRpc(!switched.Value);
         }
-        UpdateScaleClientRpc(d1, d2);
-    }
-
-    [ClientRpc]
-    void UpdateScaleClientRpc(Vector3 d1, Vector3 d2)
-    {
-        if (!IsOwner)
+        else
         {
-            SwitchSource.localScale = d1;
-            SwitchTarget.localScale = d2;
+            ApplySwitch(!switched.Value, switched.Value);
         }
     }
-
+    void ApplySwitch(bool src, bool tgt)
+    {
+        SwitchParticles.Stop();
+        SwitchParticles.Play();
+        SwitchSource.gameObject.SetActive(src);
+        SwitchTarget.gameObject.SetActive(tgt);
+    }
     void Update()
     {
         if (!IsOwner) { return; }
@@ -68,27 +76,37 @@ public class UltiAldo : NetworkBehaviour
             inUse = true;
             v.y = 0;
             hero.CanMove = false;
-            hero.anims.SetFloat("velocity", 0);
+            hero.canAnimate = false;
             firstAltitude = ctrl.transform.position.y;
 
-            System.Random rnd = new System.Random();
-            target = new Vector3(rnd.Next(-200, 200), firstAltitude + ascendLimit, rnd.Next(-200, 200));
-
-            FlightCam.Priority += 10;
+            // target selection
+            HeroMovement[] heroes = FindObjectsOfType<HeroMovement>();
+            foreach (HeroMovement item in heroes)
+            {
+                if (item != hero)
+                {
+                    target = item.transform.position;
+                    break;
+                }
+            }
+            //System.Random rnd = new System.Random();
+            //target = target != Vector3.zero ? Vector3.zero : new Vector3(rnd.Next(-200, 200), firstAltitude, rnd.Next(-200, 200));
         }
 
         if (inUse)
         {
+            hero.transform.LookAt(target);
+            hero.anims.SetFloat("velocity", 0);
             float dif = Vector3.Distance(ctrl.transform.position, target);
             switch (airState)
             {
                 case 0:
                     if (ctrl.transform.position.y - firstAltitude >= ascendLimit)
                     {
+                        FlightCam.Priority += 10;
                         flightBoost = 0;
                         airState = 1;
-                        // Switch
-                        UpdateScaleServerRpc(Vector3.zero, dsTarget);
+                        CheckSwitch();
                     }
                     v.y += ascendForce * Time.deltaTime;
                     break;
@@ -96,9 +114,7 @@ public class UltiAldo : NetworkBehaviour
                     if (dif <= ascendLimit)
                     {
                         airState = 2;
-                        target.y -= ascendLimit;
                     }
-                    hero.transform.LookAt(target);
                     StraightFlight();
                     break;
                 case 2:
@@ -110,12 +126,13 @@ public class UltiAldo : NetworkBehaviour
                     StraightFlight();
                     break;
                 default:
+                    hero.canAnimate = true;
                     v = Vector3.zero;
-                    UpdateScaleServerRpc(dsSource, Vector3.zero);
                     inUse = false;
                     hero.transform.rotation = quaternion.identity;
                     hero.CanMove = true;
                     FlightCam.Priority -= 10;
+                    CheckSwitch();
                     break;
             }
             ctrl.Move(v * Time.deltaTime);
@@ -124,8 +141,7 @@ public class UltiAldo : NetworkBehaviour
     void StraightFlight()
     {
         v = hero.transform.forward;
-        float speed = flightSpeed * (1 + flightBoost);
-        v *= Math.Clamp(speed, 0, 100);
+        v *= flightSpeed * (1 + flightBoost);
         flightBoost += boostMultiplier;
     }
 }
