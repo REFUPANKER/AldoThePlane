@@ -4,9 +4,10 @@ using Unity.Mathematics;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
-
 public class UltiAldo : NetworkBehaviour
 {
+    [SerializeField] LayerMask healthManagerLayer;
+    [SerializeField] float damage = 50;
     [SerializeField] HeroMovement hero;
     [SerializeField] CharacterController ctrl;
     [Header("Switch transforms")]
@@ -70,6 +71,7 @@ public class UltiAldo : NetworkBehaviour
     void Update()
     {
         if (!IsOwner) { return; }
+
         if (!inUse && Input.GetKeyDown(KeyCode.Alpha3) && ctrl.isGrounded)
         {
             airState = 0;
@@ -133,6 +135,7 @@ public class UltiAldo : NetworkBehaviour
                     hero.CanMove = true;
                     FlightCam.Priority -= 10;
                     CheckSwitch();
+                    AfterLanded();
                     break;
             }
             ctrl.Move(v * Time.deltaTime);
@@ -143,5 +146,18 @@ public class UltiAldo : NetworkBehaviour
         v = hero.transform.forward;
         v *= flightSpeed * (1 + flightBoost);
         flightBoost += boostMultiplier;
+    }
+
+    void AfterLanded()
+    {
+        Collider[] col = Physics.OverlapSphere(hero.transform.position, 10, healthManagerLayer);
+        foreach (var item in col)
+        {
+            if (item.transform.root != hero.transform)
+            {
+                HealthManagerPvP h = item.GetComponent<HealthManagerPvP>();
+                h?.TakeDamage(damage);
+            }
+        }
     }
 }

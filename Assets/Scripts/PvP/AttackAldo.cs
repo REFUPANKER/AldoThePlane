@@ -6,8 +6,12 @@ using UnityEngine;
 public class AttackAldo : NetworkBehaviour
 {
     [SerializeField] Transform cam;
-    [SerializeField] float attackDistance = 10;
     [SerializeField] GameObject lastTarget;
+    [SerializeField] LayerMask healthManagerLayer;
+
+    [Header("Attack Attributes")]
+    [SerializeField] float attackDistance = 10;
+    [SerializeField] float damage = 25;
 
     void Update()
     {
@@ -24,6 +28,11 @@ public class AttackAldo : NetworkBehaviour
         else
         {
             DeselectTarget();
+        }
+        if (Input.GetKeyDown(KeyCode.Mouse0) && Physics.Raycast(ray, out hit, attackDistance, healthManagerLayer))
+        {
+            HealthManagerPvP h = hit.transform.GetComponent<HealthManagerPvP>();
+            h?.TakeDamage(damage);
         }
     }
 

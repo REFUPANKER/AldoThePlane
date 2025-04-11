@@ -15,8 +15,9 @@ public class HeroMovement : NetworkBehaviour
     public bool canAnimate = true;
     public Animator anims;
     [Header("Camera setup")]
-    [SerializeField] CinemachineBrain cmcBrain;
+    private Camera oldCam;
     [SerializeField] CinemachineFreeLook flCam;
+    [SerializeField] CinemachineVirtualCameraBase[] tpsCams;
     public Camera cam;
     [Range(300, 1000)]
     [SerializeField] float mouseSens = 300;
@@ -58,20 +59,34 @@ public class HeroMovement : NetworkBehaviour
     }
     #endregion
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        if (!IsOwner)
+        if (IsOwner)
         {
-            flCam.Priority -= 1;
-            cam.depth -= 1;
-            AudioListener al = cam.GetComponent<AudioListener>();
-            al.enabled = false;
-            OutlineScript.OutlineColor = enemyColor;
+            oldCam = Camera.main;
+            oldCam.tag = "Untagged";
+            cam.tag = "MainCamera";
+            flCam.m_XAxis.m_MaxSpeed = mouseSens;
+            OutlineScript.OutlineColor = teammateColor;
         }
         else
         {
-            flCam.m_XAxis.m_MaxSpeed = mouseSens;
-            OutlineScript.OutlineColor = teammateColor;
+            foreach (var item in tpsCams)
+            {
+                item.gameObject.SetActive(false);
+            }
+            cam.depth -= 1;
+            AudioListener a = cam.GetComponent<AudioListener>();
+            a.enabled = false;
+            OutlineScript.OutlineColor = enemyColor;
+        }
+    }
+    public override void OnDestroy()
+    {
+        if (IsOwner)
+        {
+            cam.tag = "Untagged";
+            oldCam.tag = "MainCamera";
         }
     }
     void Update()
@@ -122,15 +137,6 @@ public class HeroMovement : NetworkBehaviour
                 velocity.y += gravity * Time.deltaTime;
             }
             ctrl.Move(velocity * Time.deltaTime);
-        }
-        #endregion
-
-        #region pause resume
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Cursor.visible = !Cursor.visible;
-            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
-            cmcBrain.enabled = !Cursor.visible;
         }
         #endregion
     }
