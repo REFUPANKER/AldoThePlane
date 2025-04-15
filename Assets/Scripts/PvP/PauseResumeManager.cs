@@ -6,10 +6,8 @@ using UnityEngine;
 
 public class PauseResumeManager : NetworkBehaviour
 {
-    public bool isPaused = false;
+    [SerializeField] PlayerStatusManager psm;
     [SerializeField] CinemachineVirtualCameraBase[] cams;
-    [SerializeField] HeroMovement hero;
-
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
@@ -24,13 +22,18 @@ public class PauseResumeManager : NetworkBehaviour
     }
     public void prAct()
     {
-        isPaused = !isPaused;
-        hero.CanMove = !isPaused;
-        Cursor.visible = isPaused;
-        Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
+        psm.AnimateWithFloat("velocity", 0);
+        psm.Status.Paused = !psm.Status.Paused;
+        psm.Status.CanUseSkill = !psm.Status.Paused;
+        psm.Status.CanAnimate = !psm.Status.Paused;
+        psm.Status.Targetable = !psm.Status.Paused;
+        psm.Status.CanMove = psm.Status.Dead ? false : !psm.Status.Paused;
+        psm.SetVariables();
+        Cursor.visible = psm.Status.Paused;
+        Cursor.lockState = psm.Status.Paused ? CursorLockMode.None : CursorLockMode.Locked;
         foreach (var item in cams)
         {
-            item.enabled = !isPaused;
+            item.enabled = !psm.Status.Paused;
         }
     }
 }

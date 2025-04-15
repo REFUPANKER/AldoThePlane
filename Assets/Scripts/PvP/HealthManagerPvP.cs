@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 
 public class HealthManagerPvP : NetworkBehaviour
 {
+    public bool DestroyAfterDeath = false;
 
     [SerializeField] LayerMask healthManagerLayer;
     [SerializeField] GameObject layerTargetObject;
@@ -22,7 +24,7 @@ public class HealthManagerPvP : NetworkBehaviour
     [SerializeField] float scaleShakeAmount = 0.8f;
     [SerializeField] float scaleDuration = 0.2f;
 
-    private NetworkVariable<float> nvHealth = new NetworkVariable<float>();
+    [SerializeField] NetworkVariable<float> nvHealth = new NetworkVariable<float>();
     public override void OnNetworkSpawn()
     {
         layerTargetObject.layer = Mathf.RoundToInt(Mathf.Log(healthManagerLayer.value, 2));
@@ -35,31 +37,28 @@ public class HealthManagerPvP : NetworkBehaviour
         }
         if (IsOwner)
         {
-            UServerRpc(health);
+            uHealthServerRpc(health);
             worldUi.gameObject.SetActive(ShowSelfWorldUi);
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void UServerRpc(float h)
+    void uHealthServerRpc(float h)
     {
         nvHealth.Value = h;
-        UClientRpc(h);
+        uHealthClientRpc(h);
     }
     [ClientRpc]
-    void UClientRpc(float h)
+    void uHealthClientRpc(float h)
     {
-        if (!IsOwner)
-        {
-            health = h;
-        }
+        health = h;
     }
 
     bool playingDamageEffects = false;
     public void TakeDamage(float damage)
     {
         ApplyDamageServerRpc(damage);
-        if (!playingDamageEffects)
+        if (!playingDamageEffects && transform.root.gameObject.activeSelf)
         {
             playingDamageEffects = true;
             StartCoroutine(SmoothScaleHealthbar(worldHealthbar.transform));
@@ -70,8 +69,40 @@ public class HealthManagerPvP : NetworkBehaviour
     private void ApplyDamageServerRpc(float damage)
     {
         nvHealth.Value -= damage;
+        nvHealth.Value = Math.Max(nvHealth.Value, 0);
         health = nvHealth.Value;
+        uHealthClientRpc(health);
+        if (health <= 0)
+        {
+            Died();
+            diedClientRpc();
+        }
     }
+    [ClientRpc]
+    void diedClientRpc()
+    {
+        Died();
+    }
+
+    void Died()
+    {
+        StopAllCoroutines();
+        if (DestroyAfterDeath)
+        {
+            NetworkObject g = transform.root.GetComponent<NetworkObject>();
+            g.Despawn(true);
+        }
+        else
+        {
+            // HeroMovement h = transform.root.GetComponent<HeroMovement>();
+            // h?.Kill(h.NetworkObject.OwnerClientId);
+            PlayerStatusManager psmX = transform.root.GetComponent<PlayerStatusManager>();
+            psmX.Status.Dead = true;
+            psmX.SetVariablesAsDifferentClient();
+            //TODO: death screen , respawn system
+        }
+    }
+
 
     void Update()
     {
@@ -83,8 +114,11 @@ public class HealthManagerPvP : NetworkBehaviour
     }
     void LateUpdate()
     {
-        worldUi.transform.LookAt(worldUi.transform.position + Camera.main.transform.forward);
-        worldUi.transform.rotation = Quaternion.Euler(0f, worldUi.transform.rotation.eulerAngles.y, 0f);
+        if (Camera.main != null)
+        {
+            worldUi.transform.LookAt(worldUi.transform.position + Camera.main.transform.forward);
+            worldUi.transform.rotation = Quaternion.Euler(0f, worldUi.transform.rotation.eulerAngles.y, 0f);
+        }
     }
 
     IEnumerator SmoothScaleHealthbar(Transform scalingTarget)

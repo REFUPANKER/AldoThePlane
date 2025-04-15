@@ -6,9 +6,8 @@ using Unity.Netcode.Components;
 using UnityEngine;
 public class UltiAldo : NetworkBehaviour
 {
-    [SerializeField] LayerMask healthManagerLayer;
+    [SerializeField] PlayerStatusManager psm;
     [SerializeField] float damage = 50;
-    [SerializeField] HeroMovement hero;
     [SerializeField] CharacterController ctrl;
     [Header("Switch transforms")]
     [SerializeField] Transform SwitchSource;
@@ -25,7 +24,8 @@ public class UltiAldo : NetworkBehaviour
     public float boostMultiplier = 0.01f;
     private Vector3 v;
     [Header("Target Setup")]
-    public Vector3 target;
+    [SerializeField] LayerMask healthManagerLayer;
+    public Transform target;
     public CinemachineFreeLook FlightCam;
 
     public GameObject tailsHolder;
@@ -72,34 +72,39 @@ public class UltiAldo : NetworkBehaviour
     {
         if (!IsOwner) { return; }
 
-        if (!inUse && Input.GetKeyDown(KeyCode.Alpha3) && ctrl.isGrounded)
+        if (!inUse && Input.GetKeyDown(KeyCode.Alpha3) && ctrl.isGrounded && psm.Status.CanUseSkill)
         {
-            airState = 0;
-            inUse = true;
-            v.y = 0;
-            hero.CanMove = false;
-            hero.canAnimate = false;
-            firstAltitude = ctrl.transform.position.y;
-
             // target selection
-            HeroMovement[] heroes = FindObjectsOfType<HeroMovement>();
-            foreach (HeroMovement item in heroes)
+            PlayerStatusManager[] psms = FindObjectsOfType<PlayerStatusManager>();
+            foreach (PlayerStatusManager item in psms)
             {
-                if (item != hero)
+                if (item.gameObject != ctrl.gameObject && item.Status.Targetable)
                 {
-                    target = item.transform.position;
+                    target = item.transform;
                     break;
                 }
             }
+
+            if (target == null) { return; }
+
+            airState = 0;
+            inUse = true;
+            v.y = 0;
+            psm.AnimateWithFloat("velocity", 0);
+            psm.Status.CanMove = false;
+            psm.Status.CanAnimate = false;
+            psm.SetVariables();
+            firstAltitude = target.transform.position.y;
+
             //System.Random rnd = new System.Random();
             //target = target != Vector3.zero ? Vector3.zero : new Vector3(rnd.Next(-200, 200), firstAltitude, rnd.Next(-200, 200));
         }
 
         if (inUse)
         {
-            hero.transform.LookAt(target);
-            hero.anims.SetFloat("velocity", 0);
-            float dif = Vector3.Distance(ctrl.transform.position, target);
+            ctrl.transform.LookAt(target);
+            //hero.anims.SetFloat("velocity", 0);
+            float dif = Vector3.Distance(ctrl.transform.position, target.position);
             switch (airState)
             {
                 case 0:
@@ -128,14 +133,16 @@ public class UltiAldo : NetworkBehaviour
                     StraightFlight();
                     break;
                 default:
-                    hero.canAnimate = true;
-                    v = Vector3.zero;
+                    psm.Status.CanMove = true;
+                    psm.Status.CanAnimate = true;
+                    psm.SetVariables();
+                    v.y = -ascendForce * Time.deltaTime;
                     inUse = false;
-                    hero.transform.rotation = quaternion.identity;
-                    hero.CanMove = true;
+                    ctrl.transform.rotation = quaternion.identity;
                     FlightCam.Priority -= 10;
                     CheckSwitch();
                     AfterLanded();
+                    target = null;
                     break;
             }
             ctrl.Move(v * Time.deltaTime);
@@ -143,17 +150,17 @@ public class UltiAldo : NetworkBehaviour
     }
     void StraightFlight()
     {
-        v = hero.transform.forward;
+        v = ctrl.transform.forward;
         v *= flightSpeed * (1 + flightBoost);
         flightBoost += boostMultiplier;
     }
 
     void AfterLanded()
     {
-        Collider[] col = Physics.OverlapSphere(hero.transform.position, 10, healthManagerLayer);
+        Collider[] col = Physics.OverlapSphere(ctrl.transform.position, 10, healthManagerLayer);
         foreach (var item in col)
         {
-            if (item.transform.root != hero.transform)
+            if (item.transform.root != ctrl.transform)
             {
                 HealthManagerPvP h = item.GetComponent<HealthManagerPvP>();
                 h?.TakeDamage(damage);

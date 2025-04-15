@@ -12,6 +12,10 @@ public class AttackAldo : NetworkBehaviour
     [Header("Attack Attributes")]
     [SerializeField] float attackDistance = 10;
     [SerializeField] float damage = 25;
+    public override void OnNetworkSpawn()
+    {
+        cam = Camera.main.transform;
+    }
 
     void Update()
     {

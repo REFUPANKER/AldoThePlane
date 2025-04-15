@@ -7,24 +7,25 @@ using UnityEngine;
 
 public class HeroMovement : NetworkBehaviour
 {
-    public bool CanMove = true;
+
+    [SerializeField] PlayerStatusManager psm;
+
+    public Camera cam;
     public float gravity = -9.81f;
     private Vector3 velocity;
     [SerializeField] CharacterController ctrl;
     [SerializeField] float speed = 5;
-    public bool canAnimate = true;
-    public Animator anims;
     [Header("Camera setup")]
-    private Camera oldCam;
     [SerializeField] CinemachineFreeLook flCam;
     [SerializeField] CinemachineVirtualCameraBase[] tpsCams;
-    public Camera cam;
+    [Tooltip("auto set to main camera after spawn")]
     [Range(300, 1000)]
     [SerializeField] float mouseSens = 300;
     [Header("Highlight")]
     [SerializeField] Outline OutlineScript;
     public Color teammateColor;
     public Color enemyColor;
+
 
     #region network transform
     public struct StructPlayer : INetworkSerializable
@@ -61,11 +62,9 @@ public class HeroMovement : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        cam = Camera.main;
         if (IsOwner)
         {
-            oldCam = Camera.main;
-            oldCam.tag = "Untagged";
-            cam.tag = "MainCamera";
             flCam.m_XAxis.m_MaxSpeed = mouseSens;
             OutlineScript.OutlineColor = teammateColor;
         }
@@ -81,14 +80,7 @@ public class HeroMovement : NetworkBehaviour
             OutlineScript.OutlineColor = enemyColor;
         }
     }
-    public override void OnDestroy()
-    {
-        if (IsOwner)
-        {
-            cam.tag = "Untagged";
-            oldCam.tag = "MainCamera";
-        }
-    }
+
     void Update()
     {
         #region network transform
@@ -112,7 +104,7 @@ public class HeroMovement : NetworkBehaviour
 
         if (!IsOwner) { return; }
         #region movement
-        if (CanMove)
+        if (psm.Status.CanMove && !psm.Status.Dead)
         {
             float ix = Input.GetAxis("Horizontal");
             float iz = Input.GetAxis("Vertical");
@@ -120,9 +112,9 @@ public class HeroMovement : NetworkBehaviour
             if (mv.magnitude > 1)
                 mv.Normalize();
             ctrl.Move(mv * speed * Time.deltaTime);
-            if (canAnimate)
+            if (psm.Status.CanAnimate)
             {
-                anims.SetFloat("velocity", ctrl.velocity.magnitude, 0.05f, Time.deltaTime);
+                psm.AnimateWithFloat("velocity", ctrl.velocity.magnitude, 0.05f, Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.W))
             {
@@ -139,5 +131,23 @@ public class HeroMovement : NetworkBehaviour
             ctrl.Move(velocity * Time.deltaTime);
         }
         #endregion
+    }
+
+    public void Kill(ulong id)
+    {
+        killServerRpc(id);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void killServerRpc(ulong id)
+    {
+        if (NetworkManager.Singleton.ConnectedClients.ContainsKey(id))
+        {
+            var player = NetworkManager.Singleton.ConnectedClients[id].PlayerObject;
+            PlayerStatusManager psmX = player.GetComponent<PlayerStatusManager>();
+            psmX.Status.Dead = true;
+            psmX.SetVariables();
+            Debug.Log("reached to client");
+        }
     }
 }
