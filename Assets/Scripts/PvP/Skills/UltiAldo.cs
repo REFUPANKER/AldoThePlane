@@ -72,7 +72,7 @@ public class UltiAldo : NetworkBehaviour
     {
         if (!IsOwner) { return; }
 
-        if (!inUse && Input.GetKeyDown(KeyCode.Alpha3) && ctrl.isGrounded && psm.Status.CanUseSkill)
+        if (!inUse && Input.GetKeyDown(KeyCode.Alpha3) && ctrl.isGrounded && psm.Status.CanUseSkill && !psm.Status.InVehicle)
         {
             // target selection
             PlayerStatusManager[] psms = FindObjectsOfType<PlayerStatusManager>();

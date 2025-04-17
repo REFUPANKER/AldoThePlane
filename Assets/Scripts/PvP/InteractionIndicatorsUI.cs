@@ -13,7 +13,8 @@ public class InteractionIndicatorsUI : NetworkBehaviour
     [SerializeField] GameObject IndicatorCanvas;
     [SerializeField] Text keyLabel;
     [SerializeField] Text definitionLabel;
-    [SerializeField] HeroMovement hero;
+    [SerializeField] PlayerStatusManager psm;
+    [SerializeField] float resetCanInteractCooldown = 1;
     public override void OnNetworkSpawn()
     {
         cam = Camera.main.transform;
@@ -34,7 +35,7 @@ public class InteractionIndicatorsUI : NetworkBehaviour
                 if (lastobjITB != null && lastobjITB.CanInteract)
                 {
                     IndicatorCanvas.SetActive(true);
-                    keyLabel.text = lastobjITB.IntKey;
+                    keyLabel.text = lastobjITB.IntKey.ToString();
                     definitionLabel.text = lastobjITB.DefText;
                     lastobjITB.OnStopInteract += onStopInteract;
                 }
@@ -50,18 +51,25 @@ public class InteractionIndicatorsUI : NetworkBehaviour
             lastobj = null;
             lastobjITB = null;
         }
-        if (Input.GetKeyDown(KeyCode.Mouse0) && lastobjITB != null && lastobjITB.CanInteract)
+        if (lastobjITB != null && lastobjITB.CanInteract && Input.GetKeyDown(lastobjITB.IntKey))
         {
             InInteraction = true;
-            lastobjITB.Interact(hero);
+            lastobjITB.psm = psm;
+            lastobjITB.Interact();
         }
     }
     void onStopInteract()
     {
+        StartCoroutine(ResetCanInteract());
+    }
+
+    IEnumerator ResetCanInteract()
+    {
+        yield return new WaitForSeconds(resetCanInteractCooldown);
         InInteraction = false;
         if (lastobjITB != null)
         {
-            lastobjITB.OnStopInteract += onStopInteract;
+            lastobjITB.OnStopInteract -= onStopInteract;
         }
     }
 }

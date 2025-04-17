@@ -677,9 +677,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   psm: {fileID: 4154517941540777902}
-  healthManagerLayer:
-    serializedVersion: 2
-    m_Bits: 64
   damage: 50
   ctrl: {fileID: 4403005358642139593}
   SwitchSource: {fileID: 2307562799619175229}
@@ -692,6 +689,9 @@ MonoBehaviour:
   flightSpeed: 25
   flightBoost: 10
   boostMultiplier: 0.02
+  healthManagerLayer:
+    serializedVersion: 2
+    m_Bits: 64
   target: {fileID: 0}
   FlightCam: {fileID: 318904374365280504}
   tailsHolder: {fileID: 6354618865756407649}
@@ -6286,7 +6286,7 @@ MonoBehaviour:
   IndicatorCanvas: {fileID: 4526036823706113466}
   keyLabel: {fileID: 2618946839936583038}
   definitionLabel: {fileID: 4886359065379459530}
-  hero: {fileID: 6001286508037782645}
+  psm: {fileID: 4154517941540777902}
 --- !u!1 &3481638562848023297
 GameObject:
   m_ObjectHideFlags: 0
@@ -7886,7 +7886,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5855767933013739949}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.018977547, y: 0.3186982, z: 0.0063822544, w: 0.94764477}
+  m_LocalRotation: {x: -0.018977558, y: 0.31869817, z: 0.0063822567, w: 0.94764477}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8360,7 +8360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3440949616
+  GlobalObjectIdHash: 487113695
   InScenePlacedSourceGlobalObjectIdHash: 3440949616
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -8428,8 +8428,6 @@ MonoBehaviour:
   OutlineScript: {fileID: 9117859408927794354}
   teammateColor: {r: 0.09416169, g: 1, b: 0.21385305, a: 1}
   enemyColor: {r: 1, g: 0, b: 0, a: 1}
-  targetable:
-    m_InternalValue: 0
 --- !u!114 &3096429826293691750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10133,7 +10131,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63a19c89a6d5ef84abe82d57068cfd44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDead: 0
   DestroyAfterDeath: 0
   healthManagerLayer:
     serializedVersion: 2
@@ -10148,8 +10145,6 @@ MonoBehaviour:
   scaleShakeAmount: 0.8
   scaleDuration: 0.2
   nvHealth:
-    m_InternalValue: 0
-  nvIsDead:
     m_InternalValue: 0
 --- !u!65 &1954636867020685097
 BoxCollider:

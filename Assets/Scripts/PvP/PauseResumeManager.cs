@@ -24,10 +24,13 @@ public class PauseResumeManager : NetworkBehaviour
     {
         psm.AnimateWithFloat("velocity", 0);
         psm.Status.Paused = !psm.Status.Paused;
-        psm.Status.CanUseSkill = !psm.Status.Paused;
-        psm.Status.CanAnimate = !psm.Status.Paused;
         psm.Status.Targetable = !psm.Status.Paused;
-        psm.Status.CanMove = psm.Status.Dead ? false : !psm.Status.Paused;
+        if (!psm.Status.InVehicle)
+        {
+            psm.Status.CanUseSkill = !psm.Status.Paused;
+            psm.Status.CanAnimate = !psm.Status.Paused;
+            psm.Status.CanMove = psm.Status.Dead ? false : !psm.Status.Paused;
+        }
         psm.SetVariables();
         Cursor.visible = psm.Status.Paused;
         Cursor.lockState = psm.Status.Paused ? CursorLockMode.None : CursorLockMode.Locked;

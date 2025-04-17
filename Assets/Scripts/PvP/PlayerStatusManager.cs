@@ -22,6 +22,7 @@ public class PlayerStatusManager : NetworkBehaviour
         public bool CanMove;
         public bool CanAnimate;
         public bool CanUseSkill;
+        public bool InVehicle;
         public bool Targetable;
         public bool Paused;
         public bool Dead;
@@ -30,6 +31,7 @@ public class PlayerStatusManager : NetworkBehaviour
             s.SerializeValue(ref CanMove);
             s.SerializeValue(ref CanAnimate);
             s.SerializeValue(ref CanUseSkill);
+            s.SerializeValue(ref InVehicle);
             s.SerializeValue(ref Targetable);
             s.SerializeValue(ref Paused);
             s.SerializeValue(ref Dead);
@@ -60,6 +62,7 @@ public class PlayerStatusManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void uServerRpc(statusstruct d)
     {
+        // if (_status.Value.Paused != d.Paused) { OnPaused?.Invoke(); }
         _status.Value = d;
         uClientRpc(d);
     }
@@ -69,6 +72,7 @@ public class PlayerStatusManager : NetworkBehaviour
     {
         if (!IsOwner)
         {
+            //if (Status.Paused != d.Paused) { OnPaused?.Invoke(); }
             Status = d;
         }
     }
@@ -93,4 +97,9 @@ public class PlayerStatusManager : NetworkBehaviour
     public float AnimatorGetFloat(string name) { return animator.GetFloat(name); }
     public bool AnimatorGetBool(string name) { return animator.GetBool(name); }
     #endregion
+
+    // #region events
+    // public delegate void _OnPaused();
+    // public event _OnPaused OnPaused;
+    // #endregion
 }

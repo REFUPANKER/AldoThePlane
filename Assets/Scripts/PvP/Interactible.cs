@@ -5,15 +5,17 @@ using Unity.Netcode;
 
 public class Interactible : NetworkBehaviour
 {
-    public string IntKey;
+    public KeyCode IntKey;
     public string DefText;
     public bool CanInteract = true;
+    public PlayerStatusManager psm;
     private NetworkVariable<bool> _CanInteract = new NetworkVariable<bool>(true);
 
     public delegate void onStopInteract();
     public event onStopInteract OnStopInteract;
 
-    public virtual void Interact(HeroMovement hero)
+    // dont forget to set psm
+    public virtual void Interact()
     {
         uServerRpc(false);
     }
