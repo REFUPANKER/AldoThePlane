@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode.Components;
 using UnityEngine;
 
-public class AnimFix : NetworkAnimator
+public class FixAnim : NetworkAnimator
 {
     protected override bool OnIsServerAuthoritative()
     {

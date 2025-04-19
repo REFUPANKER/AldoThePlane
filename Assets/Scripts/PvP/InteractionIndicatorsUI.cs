@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class InteractionIndicatorsUI : NetworkBehaviour
 {
+    [SerializeField] PlayerStatusManager psm;
     Transform cam;
     public bool InInteraction = false;
     [SerializeField] LayerMask interactibleLayer;
@@ -13,7 +14,6 @@ public class InteractionIndicatorsUI : NetworkBehaviour
     [SerializeField] GameObject IndicatorCanvas;
     [SerializeField] Text keyLabel;
     [SerializeField] Text definitionLabel;
-    [SerializeField] PlayerStatusManager psm;
     [SerializeField] float resetCanInteractCooldown = 1;
     public override void OnNetworkSpawn()
     {
@@ -27,7 +27,7 @@ public class InteractionIndicatorsUI : NetworkBehaviour
         if (!IsOwner) { return; }
         Ray ray = new Ray(cam.position, cam.forward);
         RaycastHit hit;
-        if (!InInteraction && Physics.Raycast(ray, out hit, detectionDistance, interactibleLayer))
+        if (!psm.Status.Paused && !InInteraction && Physics.Raycast(ray, out hit, detectionDistance, interactibleLayer))
         {
             if (hit.transform != lastobj)
             {

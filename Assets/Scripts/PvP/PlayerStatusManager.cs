@@ -1,11 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class PlayerStatusManager : NetworkBehaviour
 {
+    [SerializeField,
+    Tooltip("(Encapsulated) The objects that can be disabled or enabled for Player visibility")]
+    GameObject[] VisiblityObjects;
+
+
+    [SerializeField, Tooltip("when user enters vehicle,change exclude layer to interactible")] HeroMovement hero;
+    [SerializeField] LayerMask InteractibleLayer;
+    [SerializeField] LayerMask DefaultExcludingLayers;
+    [SerializeField] Animator animator;
+
+    #region Object Data Setup
     public statusstruct Status = new statusstruct()
     {
         CanMove = true,
@@ -14,7 +27,6 @@ public class PlayerStatusManager : NetworkBehaviour
         CanUseSkill = true,
     };
 
-    public Animator animator;
 
     [Serializable]
     public struct statusstruct : INetworkSerializable
@@ -77,6 +89,8 @@ public class PlayerStatusManager : NetworkBehaviour
         }
     }
 
+    #endregion
+
     #region animations
     public void AnimateWithFloat(string name, float value, float damping = 0, float damptiming = 0)
     {
@@ -102,4 +116,57 @@ public class PlayerStatusManager : NetworkBehaviour
     // public delegate void _OnPaused();
     // public event _OnPaused OnPaused;
     // #endregion
+
+    #region visibility
+    public void ChangePlayerVisibility(bool visible)
+    {
+        visibilityServerRpc(visible);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void visibilityServerRpc(bool visible)
+    {
+        foreach (GameObject item in VisiblityObjects)
+        {
+            item.SetActive(visible);
+        }
+        visibilityClientRpc(visible);
+    }
+    [ClientRpc]
+    private void visibilityClientRpc(bool visible)
+    {
+        foreach (GameObject item in VisiblityObjects)
+        {
+            item.SetActive(visible);
+        }
+    }
+    #endregion
+
+    #region parent
+    public void ChangeParent(NetworkObject newParent) { SetParentServerRpc(newParent); }
+    [ServerRpc(RequireOwnership = false)]
+    void SetParentServerRpc(NetworkObjectReference parentRef)
+    {
+        if (parentRef.TryGet(out NetworkObject parentObj))
+        {
+            transform.SetParent(parentObj.transform, false);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = quaternion.identity;
+            hero.ctrl.excludeLayers = InteractibleLayer;
+        }
+    }
+
+    public void RemoveParent(Vector3 margin) { RemoveParentServerRpc(margin); }
+    [ServerRpc(RequireOwnership = false)]
+    void RemoveParentServerRpc(Vector3 margin)
+    {
+        Vector3 p = transform.root.position - margin;
+        quaternion r = transform.root.rotation;
+        hero.ctrl.enabled = false;
+        transform.SetParent(null);
+        transform.position = p;
+        hero.ctrl.enabled = true;
+        hero.ctrl.excludeLayers = DefaultExcludingLayers;
+    }
+    #endregion
+
 }

@@ -214,7 +214,7 @@ Transform:
   m_GameObject: {fileID: 753406074366622842}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.8257344, y: 1.8789382, z: -2.4073958}
+  m_LocalPosition: {x: -3.009163, y: 2.0934372, z: 0.20277052}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -263,7 +263,7 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_YAxis:
-    Value: 0.3195774
+    Value: 0.3512566
     m_SpeedMode: 0
     m_MaxSpeed: 3
     m_AccelTime: 0
@@ -532,7 +532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 1.8789382, z: -3.0214005}
+  m_FollowOffset: {x: 0, y: 2.0934372, z: -3.015987}
   m_XDamping: 1
   m_YDamping: 0
   m_ZDamping: 0
@@ -1056,7 +1056,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 1.8789382, z: -3.0214005}
+  m_FollowOffset: {x: 0, y: 2.0934372, z: -3.015987}
   m_XDamping: 1
   m_YDamping: 0
   m_ZDamping: 0
@@ -6278,6 +6278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 000d4de4c82d2e247984799bd8edbbd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  psm: {fileID: 4154517941540777902}
   InInteraction: 0
   interactibleLayer:
     serializedVersion: 2
@@ -6286,7 +6287,7 @@ MonoBehaviour:
   IndicatorCanvas: {fileID: 4526036823706113466}
   keyLabel: {fileID: 2618946839936583038}
   definitionLabel: {fileID: 4886359065379459530}
-  psm: {fileID: 4154517941540777902}
+  resetCanInteractCooldown: 1
 --- !u!1 &3481638562848023297
 GameObject:
   m_ObjectHideFlags: 0
@@ -6746,7 +6747,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3607160035124603071}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.05338817, y: 0.31825602, z: 0.017954735, w: 0.9463301}
+  m_LocalRotation: {x: -0.014236263, y: 0.7303315, z: 0.015227848, w: 0.6827748}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7191,7 +7192,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &340191580095306637
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7211,7 +7212,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -150}
-  m_SizeDelta: {x: 300, y: 75}
+  m_SizeDelta: {x: 250, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5516935159402668449
 CanvasRenderer:
@@ -7492,10 +7493,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 40
+    m_FontSize: 35
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 4
+    m_MinSize: 3
     m_MaxSize: 68
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -7886,7 +7887,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5855767933013739949}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.018977558, y: 0.31869817, z: 0.0063822567, w: 0.94764477}
+  m_LocalRotation: {x: 0.010574899, y: 0.73040265, z: -0.01131146, w: 0.68284136}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7965,7 +7966,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5925710498436098601}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.036211587, y: 0.3185294, z: 0.0121781565, w: 0.9471428}
+  m_LocalRotation: {x: -0.0018473912, y: 0.7304875, z: 0.001976066, w: 0.68292063}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8076,7 +8077,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6132958796529140344}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.13870122, y: -0, z: -0, w: 0.99033433}
+  m_LocalRotation: {x: 0.13870122, y: 4.7089715e-24, z: -1.0335565e-24, w: 0.99033433}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8395,14 +8396,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c360626743534d74e8c013a60974253d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  VisiblityObjects:
+  - {fileID: 3616758513240907490}
+  - {fileID: 474004698684229822}
+  - {fileID: 7915420219439861978}
+  hero: {fileID: 6001286508037782645}
+  InteractibleLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  DefaultExcludingLayers:
+    serializedVersion: 2
+    m_Bits: 384
+  animator: {fileID: 9201213607618382795}
   Status:
     CanMove: 1
     CanAnimate: 1
     CanUseSkill: 1
+    InVehicle: 0
     Targetable: 1
     Paused: 0
     Dead: 0
-  animator: {fileID: 9201213607618382795}
 --- !u!114 &6001286508037782645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8440,6 +8453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c73b475db9eb9274aa20d5bb715cda83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  psm: {fileID: 4154517941540777902}
   cam: {fileID: 0}
   lastTarget: {fileID: 0}
   healthManagerLayer:
@@ -9270,7 +9284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 1.8789382, z: -3.0214005}
+  m_FollowOffset: {x: 0, y: 2.0934372, z: -3.015987}
   m_XDamping: 1
   m_YDamping: 0
   m_ZDamping: 0
@@ -9373,8 +9387,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 37.5, y: 0}
-  m_SizeDelta: {x: -75, y: 50}
+  m_AnchoredPosition: {x: 25.000013, y: 0}
+  m_SizeDelta: {x: -49.999973, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8988792041154197445
 CanvasRenderer:
@@ -9715,7 +9729,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 75, y: 75}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &8641697012252909239
 CanvasRenderer:
@@ -9822,10 +9836,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 31
+    m_FontSize: 25
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 0
     m_MaxSize: 68
     m_Alignment: 4
     m_AlignByGeometry: 0

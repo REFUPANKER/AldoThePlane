@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class AttackAldo : NetworkBehaviour
 {
+    [SerializeField] PlayerStatusManager psm;
     [SerializeField] Transform cam;
     [SerializeField] GameObject lastTarget;
     [SerializeField] LayerMask healthManagerLayer;
@@ -19,7 +20,7 @@ public class AttackAldo : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner) { return; }
+        if (!IsOwner || psm.Status.Paused) { return; }
         Ray ray = new Ray(cam.position, cam.forward);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, attackDistance))

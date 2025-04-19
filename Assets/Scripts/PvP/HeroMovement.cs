@@ -13,7 +13,7 @@ public class HeroMovement : NetworkBehaviour
     public Camera cam;
     public float gravity = -9.81f;
     private Vector3 velocity;
-    [SerializeField] CharacterController ctrl;
+    public CharacterController ctrl;
     [SerializeField] float speed = 5;
     [Header("Camera setup")]
     [SerializeField] CinemachineFreeLook flCam;
@@ -42,8 +42,8 @@ public class HeroMovement : NetworkBehaviour
     }
     private NetworkVariable<StructPlayer> netPlayerData = new NetworkVariable<StructPlayer>(writePerm: NetworkVariableWritePermission.Server);
 
-    [ServerRpc]
-    void UpdatePlayerServerRpc(StructPlayer data)
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlayerServerRpc(StructPlayer data)
     {
         netPlayerData.Value = data;
         UpdatePlayerClientRpc(data);
