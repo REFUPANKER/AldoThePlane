@@ -37,7 +37,7 @@ public class AttackAldo : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0) && Physics.Raycast(ray, out hit, attackDistance, healthManagerLayer))
         {
             HealthManagerPvP h = hit.transform.GetComponent<HealthManagerPvP>();
-            h?.TakeDamage(damage);
+            h?.TakeDamage(damage,DeathTypes.NormalAttack);
         }
     }
 

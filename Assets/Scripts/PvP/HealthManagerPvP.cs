@@ -9,10 +9,13 @@ using UnityEngine.UI;
 
 public class HealthManagerPvP : NetworkBehaviour
 {
-    public bool DestroyAfterDeath = false;
+    [SerializeField] string Name;
+    [SerializeField] bool DestroyAfterDeath = false;
+    [SerializeField] NetworkObject DestroyThisObjectAfterDeath;
+    [SerializeField] bool ShowDeathMessage = false;
 
-    [SerializeField] LayerMask healthManagerLayer;
-    [SerializeField] GameObject layerTargetObject;
+    [SerializeField, Tooltip("Hitbox object layer must be healthmanager layer")] LayerMask healthManagerLayer;
+    [SerializeField, Tooltip("Changes object s layer to healthmanager layer")] GameObject layerTargetObject;
     [SerializeField] float health;
     [SerializeField] Canvas worldUi;
     [SerializeField] bool ShowSelfWorldUi = true;
@@ -25,8 +28,13 @@ public class HealthManagerPvP : NetworkBehaviour
     [SerializeField] float scaleDuration = 0.2f;
 
     [SerializeField] NetworkVariable<float> nvHealth = new NetworkVariable<float>();
+
+    [Tooltip("Auto get at start")]
+    public GameNotifsManager gnm;
+
     public override void OnNetworkSpawn()
     {
+        gnm = FindAnyObjectByType<GameNotifsManager>();
         layerTargetObject.layer = Mathf.RoundToInt(Mathf.Log(healthManagerLayer.value, 2));
         worldHealthbar.maxValue = health;
         worldHealthbar.value = health;
@@ -55,9 +63,9 @@ public class HealthManagerPvP : NetworkBehaviour
     }
 
     bool playingDamageEffects = false;
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, DeathTypes deathType = DeathTypes.NormalAttack)
     {
-        ApplyDamageServerRpc(damage);
+        ApplyDamageServerRpc(damage, deathType);
         if (!playingDamageEffects && transform.root.gameObject.activeSelf)
         {
             playingDamageEffects = true;
@@ -66,7 +74,7 @@ public class HealthManagerPvP : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ApplyDamageServerRpc(float damage)
+    private void ApplyDamageServerRpc(float damage, DeathTypes deathType = DeathTypes.NormalAttack)
     {
         nvHealth.Value -= damage;
         nvHealth.Value = Math.Max(nvHealth.Value, 0);
@@ -74,35 +82,50 @@ public class HealthManagerPvP : NetworkBehaviour
         uHealthClientRpc(health);
         if (health <= 0)
         {
+            if (ShowDeathMessage)
+            {
+                if (DestroyAfterDeath)
+                {
+                    gnm.ShowKillMessage("", Name, DeathTypes.NormalAttack);
+                }
+                else
+                {
+                    gnm.ShowKillMessage("P1", Name, deathType);
+                }
+            }
             Died();
             diedClientRpc();
         }
     }
+
     [ClientRpc]
-    void diedClientRpc()
-    {
-        Died();
-    }
+    void diedClientRpc() { Died(); }
 
     void Died()
     {
         StopAllCoroutines();
         if (DestroyAfterDeath)
         {
-            NetworkObject g = transform.root.GetComponent<NetworkObject>();
-            g.Despawn(true);
+            DestroyThisObjectAfterDeath.Despawn(true);
         }
         else
         {
-            // HeroMovement h = transform.root.GetComponent<HeroMovement>();
-            // h?.Kill(h.NetworkObject.OwnerClientId);
             PlayerStatusManager psmX = transform.root.GetComponent<PlayerStatusManager>();
-            psmX.Status.Dead = true;
-            psmX.SetVariablesAsDifferentClient();
-            //TODO: death screen , respawn system
+            if (psmX != null)
+            {
+                // HeroMovement h = transform.root.GetComponent<HeroMovement>();
+                // h?.Kill(h.NetworkObject.OwnerClientId);
+                psmX.Status.Dead = true;
+                psmX.SetVariablesAsDifferentClient();
+                //TODO: death screen , respawn system
+                Debug.Log("Dead");
+            }
+            else
+            {
+                Debug.Log("Dead but not destroyed");
+            }
         }
     }
-
 
     void Update()
     {
@@ -110,14 +133,6 @@ public class HealthManagerPvP : NetworkBehaviour
         if (UiHealthbar != null)
         {
             UiHealthbar.value = Mathf.Lerp(UiHealthbar.value, nvHealth.Value, Time.deltaTime * healthbarSmoothnes);
-        }
-    }
-    void LateUpdate()
-    {
-        if (Camera.main != null)
-        {
-            worldUi.transform.LookAt(worldUi.transform.position + Camera.main.transform.forward);
-            worldUi.transform.rotation = Quaternion.Euler(0f, worldUi.transform.rotation.eulerAngles.y, 0f);
         }
     }
 

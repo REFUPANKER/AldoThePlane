@@ -94,7 +94,7 @@ public class HeroMovement : NetworkBehaviour
             };
             UpdatePlayerServerRpc(data);
         }
-        else
+        else if (ctrl.enabled)
         {
             transform.position = netPlayerData.Value.pos;
             transform.rotation = netPlayerData.Value.rot;
@@ -104,7 +104,7 @@ public class HeroMovement : NetworkBehaviour
 
         if (!IsOwner) { return; }
         #region movement
-        if (psm.Status.CanMove && !psm.Status.Dead)
+        if (ctrl.enabled && psm.Status.CanMove && !psm.Status.Dead)
         {
             float ix = Input.GetAxis("Horizontal");
             float iz = Input.GetAxis("Vertical");

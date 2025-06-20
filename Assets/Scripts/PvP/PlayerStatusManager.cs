@@ -12,13 +12,11 @@ public class PlayerStatusManager : NetworkBehaviour
     Tooltip("(Encapsulated) The objects that can be disabled or enabled for Player visibility")]
     GameObject[] VisiblityObjects;
 
-
-    [SerializeField, Tooltip("when user enters vehicle,change exclude layer to interactible")] HeroMovement hero;
-    [SerializeField] LayerMask InteractibleLayer;
-    [SerializeField] LayerMask DefaultExcludingLayers;
+    [SerializeField, Tooltip("when user enters vehicle,change exclude layer to interactible")] CharacterController ctrl;
     [SerializeField] Animator animator;
 
-    #region Object Data Setup
+    #region Object Data Setup (OnNetworkSpawn)
+
     public statusstruct Status = new statusstruct()
     {
         CanMove = true,
@@ -142,31 +140,50 @@ public class PlayerStatusManager : NetworkBehaviour
     #endregion
 
     #region parent
-    public void ChangeParent(NetworkObject newParent) { SetParentServerRpc(newParent); }
+    public void ChangeParent(NetworkObject newParent)
+    {
+        SetParentServerRpc(new NetworkObjectReference(newParent));
+    }
     [ServerRpc(RequireOwnership = false)]
     void SetParentServerRpc(NetworkObjectReference parentRef)
     {
         if (parentRef.TryGet(out NetworkObject parentObj))
         {
             transform.SetParent(parentObj.transform, false);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = quaternion.identity;
-            hero.ctrl.excludeLayers = InteractibleLayer;
+            SetParentVariables();
+            SetParentClientRpc();
         }
     }
-
-    public void RemoveParent(Vector3 margin) { RemoveParentServerRpc(margin); }
-    [ServerRpc(RequireOwnership = false)]
-    void RemoveParentServerRpc(Vector3 margin)
+    [ClientRpc]
+    void SetParentClientRpc() { if (!IsServer) { SetParentVariables(); } }
+    void SetParentVariables()
     {
-        Vector3 p = transform.root.position - margin;
-        quaternion r = transform.root.rotation;
-        hero.ctrl.enabled = false;
-        transform.SetParent(null);
-        transform.position = p;
-        hero.ctrl.enabled = true;
-        hero.ctrl.excludeLayers = DefaultExcludingLayers;
+        ctrl.enabled = false;
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = quaternion.identity;
+    }
+
+    public void RemoveParent(Vector3 worldOffset)
+    {
+        RemoveParentServerRpc(worldOffset);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    void RemoveParentServerRpc(Vector3 worldOffset)
+    {
+        Quaternion rot = transform.parent.rotation;
+        transform.SetParent(null, false);
+        RemoveParentVariables(worldOffset, rot);
+        RemoveParentClientRpc(worldOffset, rot);
+    }
+    [ClientRpc]
+    void RemoveParentClientRpc(Vector3 worldOffset, Quaternion rot) { if (!IsServer) { RemoveParentVariables(worldOffset, rot); } }
+    void RemoveParentVariables(Vector3 worldOffset, Quaternion rot)
+    {
+        transform.position = worldOffset;
+        transform.rotation = rot;
+        ctrl.enabled = true;
     }
     #endregion
+
 
 }

@@ -9,3 +9,14 @@ public enum Variation
     Lord,
     Tower
 }
+
+public enum DeathTypes
+{
+    NormalAttack,
+    Tower,
+    Dwarf,
+    BigDwarf,
+    UltiAldo,
+    SkillAldoPunch,
+    SkillAldoShield,
+}

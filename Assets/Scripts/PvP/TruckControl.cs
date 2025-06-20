@@ -5,11 +5,12 @@ using Cinemachine;
 using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TruckControl : Interactible
 {
     public Rigidbody carrb;
-    public Vector3 leaveCarMargin = new Vector3(-2, 0, 0);
+    public Vector3 ExitOffset = new Vector3(-2, 0, 0);
     public CinemachineFreeLook tpscam;
 
     public float motorTorque = 1500f;
@@ -59,17 +60,19 @@ public class TruckControl : Interactible
     {
         backLightsHolder.SetActive(false);
         frontLightsHolder.SetActive(false);
+        UpdateAllWheels();
     }
 
     public override void OnNetworkSpawn()
     {
-        uCanDriveServerRpc(false, ulong.MaxValue);
-        truckctrl t = new truckctrl()
-        {
-            pos = transform.position,
-            rot = transform.rotation,
-        };
-        uStatServerRpc(t);
+        // uCanDriveServerRpc(false, ulong.MaxValue);
+        // truckctrl t = new truckctrl()
+        // {
+        //     pos = transform.position,
+        //     rot = transform.rotation,
+        // };
+        // uStatServerRpc(t);
+        ResetCarSpeedServerRpc();
     }
 
     bool keyUp = false;
@@ -83,10 +86,15 @@ public class TruckControl : Interactible
 
         if (nvDriver.Value != NetworkManager.Singleton.LocalClientId)
         {
+            wheelFL.motorTorque = tstatus.Value.torque;
+            wheelFR.motorTorque = tstatus.Value.torque;
+            wheelFL.brakeTorque = tstatus.Value.brake;
+            wheelFR.brakeTorque = tstatus.Value.brake;
+            wheelRL.brakeTorque = tstatus.Value.brake;
+            wheelRR.brakeTorque = tstatus.Value.brake;
             wheelFL.steerAngle = tstatus.Value.steer;
             wheelFR.steerAngle = tstatus.Value.steer;
-            UpdateWheel(wheelFL, wheelFLTransform);
-            UpdateWheel(wheelFR, wheelFRTransform);
+            UpdateAllWheels();
             transform.position = tstatus.Value.pos;
             transform.rotation = tstatus.Value.rot;
             backLightsHolder.SetActive(tstatus.Value.backlights);
@@ -100,18 +108,22 @@ public class TruckControl : Interactible
             bool frontLightsTriggered = Input.GetKey(frontlightKey);
             float currentBrakeForce = isBraking ? brakeforce : 0f;
             float motor = isBraking ? 0 : Input.GetAxis("Vertical") * motorTorque;
-
             if (Input.GetKeyUp(IntKey)) { keyUp = true; }
             if (keyUp && Input.GetKeyDown(IntKey)) { StopInteract(); return; }
-
+            if (carrb.velocity.magnitude <= 0.3f && Input.GetKeyDown(KeyCode.R))
+            {
+                transform.position = transform.position + Vector3.up * 2f;
+                transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+            }
             wheelFL.motorTorque = motor;
             wheelFR.motorTorque = motor;
+            wheelFL.brakeTorque = currentBrakeForce;
+            wheelFR.brakeTorque = currentBrakeForce;
             wheelRL.brakeTorque = currentBrakeForce;
             wheelRR.brakeTorque = currentBrakeForce;
             wheelFL.steerAngle = steer;
             wheelFR.steerAngle = steer;
-            UpdateWheel(wheelFL, wheelFLTransform);
-            UpdateWheel(wheelFR, wheelFRTransform);
+            UpdateAllWheels();
 
             backLightsHolder.SetActive(backLightsTriggered);
             frontLightsHolder.SetActive(frontLightsTriggered);
@@ -132,7 +144,7 @@ public class TruckControl : Interactible
     }
     void LateUpdate()
     {
-        tpscam.gameObject.SetActive(psm != null && !psm.Status.Paused);
+        tpscam.enabled = psm != null && !psm.Status.Paused;
     }
     [ServerRpc(RequireOwnership = false)]
     void uStatServerRpc(truckctrl t)
@@ -149,12 +161,22 @@ public class TruckControl : Interactible
     [ServerRpc(RequireOwnership = false)]
     void ResetCarSpeedServerRpc()
     {
+        ResetCarSpeed();
+        ResetCarSpeedClientRpc();
+    }
+    [ClientRpc]
+    void ResetCarSpeedClientRpc() { if (!IsServer) { ResetCarSpeed(); } }
+    void ResetCarSpeed()
+    {
+        wheelFL.motorTorque = 0;
+        wheelFR.motorTorque = 0;
         carrb.velocity = Vector3.zero;
         carrb.angularVelocity = Vector3.zero;
         truckctrl nt = new truckctrl()
         {
             pos = transform.position,
-            rot = transform.rotation
+            rot = transform.rotation,
+            brake = 9999f
         };
         uStatServerRpc(nt);
     }
@@ -166,6 +188,13 @@ public class TruckControl : Interactible
         collider.GetWorldPose(out pos, out rot);
         wheelTransform.position = pos;
         wheelTransform.rotation = rot;
+    }
+    void UpdateAllWheels()
+    {
+        UpdateWheel(wheelFL, wheelFLTransform);
+        UpdateWheel(wheelFR, wheelFRTransform);
+        UpdateWheel(wheelRL, wheelRLTransform);
+        UpdateWheel(wheelRR, wheelRRTransform);
     }
 
     public override void Interact()
@@ -197,7 +226,7 @@ public class TruckControl : Interactible
         uCanDriveServerRpc(false, ulong.MaxValue);
         keyUp = false;
         psm.ChangePlayerVisibility(true);
-        psm.RemoveParent(leaveCarMargin);
+        psm.RemoveParent(transform.position - (-transform.right * ExitOffset.x) - (transform.forward * ExitOffset.z));
         psm = null;
         base.StopInteract();
     }
@@ -205,10 +234,7 @@ public class TruckControl : Interactible
     [ServerRpc(RequireOwnership = false)]
     void uCanDriveServerRpc(bool t, ulong player)
     {
-        if (IsOwner)
-        {
-            nvCanDrive.Value = t;
-            nvDriver.Value = player == ulong.MaxValue ? Convert.ToUInt64(NetworkManager.Singleton.ConnectedClients.Count + 1) : player;
-        }
+        nvCanDrive.Value = t;
+        nvDriver.Value = player == ulong.MaxValue ? Convert.ToUInt64(NetworkManager.Singleton.ConnectedClients.Count + 1) : player;
     }
 }

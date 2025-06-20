@@ -163,7 +163,7 @@ public class UltiAldo : NetworkBehaviour
             if (item.transform.root != ctrl.transform)
             {
                 HealthManagerPvP h = item.GetComponent<HealthManagerPvP>();
-                h?.TakeDamage(damage);
+                h?.TakeDamage(damage, DeathTypes.UltiAldo);
             }
         }
     }

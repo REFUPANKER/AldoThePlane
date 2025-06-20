@@ -7085,6 +7085,7 @@ GameObject:
   - component: {fileID: 4110851549617539902}
   - component: {fileID: 8369655788350101795}
   - component: {fileID: 25682419606265224}
+  - component: {fileID: 3883034485179646136}
   m_Layer: 7
   m_Name: WorldUI
   m_TagString: Untagged
@@ -7176,6 +7177,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &3883034485179646136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416380508855910141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f060446f61eaa04458fb9a8961f21db5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4526036823706113466
 GameObject:
   m_ObjectHideFlags: 0
@@ -7887,7 +7900,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5855767933013739949}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.010574899, y: 0.73040265, z: -0.01131146, w: 0.68284136}
+  m_LocalRotation: {x: 0.010574898, y: 0.73040265, z: -0.01131146, w: 0.68284136}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8077,7 +8090,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6132958796529140344}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.13870122, y: 4.7089715e-24, z: -1.0335565e-24, w: 0.99033433}
+  m_LocalRotation: {x: 0.13870122, y: -0, z: -0, w: 0.99033433}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8399,14 +8412,7 @@ MonoBehaviour:
   VisiblityObjects:
   - {fileID: 3616758513240907490}
   - {fileID: 474004698684229822}
-  - {fileID: 7915420219439861978}
-  hero: {fileID: 6001286508037782645}
-  InteractibleLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  DefaultExcludingLayers:
-    serializedVersion: 2
-    m_Bits: 384
+  ctrl: {fileID: 4403005358642139593}
   animator: {fileID: 9201213607618382795}
   Status:
     CanMove: 1
@@ -9178,7 +9184,7 @@ CharacterController:
     m_Bits: 63
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 896
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -10145,7 +10151,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63a19c89a6d5ef84abe82d57068cfd44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Name: 
   DestroyAfterDeath: 0
+  DestroyThisObjectAfterDeath: {fileID: 0}
+  ShowDeathMessage: 1
   healthManagerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -10160,6 +10169,7 @@ MonoBehaviour:
   scaleDuration: 0.2
   nvHealth:
     m_InternalValue: 0
+  gnm: {fileID: 0}
 --- !u!65 &1954636867020685097
 BoxCollider:
   m_ObjectHideFlags: 0
