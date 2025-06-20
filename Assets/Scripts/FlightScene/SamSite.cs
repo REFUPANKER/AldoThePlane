@@ -9,13 +9,23 @@ public class SamSite : MonoBehaviour
     public bool CanFire = true;
     public float FireCooldown = 5;
     public List<SamSiteMissile> missiles;
-
+    public float rotatingSpeed = 5;
     void Update()
     {
-        Collider[] cols = Physics.OverlapSphere(transform.position, range, planeLayermask);
-        if (CanFire && cols.Length > 0)
+        if (missiles.Count == 0)
         {
-            FireMissile(cols[0].transform.position);
+            this.enabled = false;
+        }
+        Collider[] cols = Physics.OverlapSphere(transform.position, range, planeLayermask);
+        if (cols.Length > 0)
+        {
+            Vector3 dir = cols[0].transform.position - transform.position;
+            dir.y = 0;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-dir), Time.deltaTime * rotatingSpeed);
+            if (CanFire)
+            {
+                FireMissile(cols[0].transform.position);
+            }
         }
     }
 

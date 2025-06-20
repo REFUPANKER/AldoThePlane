@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 public class SamSiteMissile : MonoBehaviour
@@ -21,20 +22,28 @@ public class SamSiteMissile : MonoBehaviour
     public float speedMultiplier = 0.1f;
     public float maxSpeed = 200;
 
+    public float turnSpeed = 5;
+
     public bool exploded = false;
     public bool fired = false;
     public bool flared = false;
     public Vector3 target;
 
     public bool missedTarget = false;
-    public float missTargetDetonationTime = 10;
 
     public void Fire(Vector3 t)
     {
         missileParticles.Play();
         fired = true;
+        transform.parent = null;
         StartCoroutine(landUp());
         target = t;
+    }
+
+    IEnumerator landUp()
+    {
+        yield return new WaitForSeconds(landupTime);
+        landedUp = true;
     }
 
     void Update()
@@ -45,42 +54,70 @@ public class SamSiteMissile : MonoBehaviour
             transform.position += transform.forward * landupSpeed * Time.deltaTime;
             return;
         }
-        Collider[] cols = Physics.OverlapSphere(transform.position, range, planeLayer);
-        Collider[] flares = Physics.OverlapSphere(transform.position, range, flareLayer);
-        flared = flares.Length > 0;
-        if (cols.Length > 0 && !flared && !missedTarget)
+        DetectFlares();
+        SearchTarget();
+        if (!flared || !missedTarget)
         {
-            target = cols[0].transform.position;
-            transform.LookAt(target);
-            if (Vector3.Distance(transform.position, target) < detonationRange)
-            {
-                Explode();
-            }
-        }
-        else
-        {
-            StartCoroutine(missTargetDetonation());
+            Quaternion lookRotation = Quaternion.LookRotation((target - transform.position).normalized);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, turnSpeed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, target) < detonationRange) { Explode(); }
         }
         transform.position += transform.forward * speed * Time.deltaTime;
         speed = Math.Clamp(speed + speedMultiplier, 0, maxSpeed);
     }
 
-    IEnumerator landUp()
+
+    public bool SearchingTarget;
+    public float NoTargetDetonationTime = 10f;
+
+
+    Collider scanForEnemy()
     {
-        yield return new WaitForSeconds(landupTime);
-        landedUp = true;
+        Collider[] e = Physics.OverlapSphere(transform.position, range, planeLayer);
+        return e.Length > 0 ? e[0] : null;
+    }
+    void SearchTarget()
+    {
+        Collider e = scanForEnemy();
+        if (e != null)
+        {
+            target = e.transform.position;
+        }
+        else if (!SearchingTarget)
+        {
+            StartCoroutine(searchTarget());
+        }
+    }
+    IEnumerator searchTarget()
+    {
+        SearchingTarget = true;
+        yield return new WaitForSeconds(NoTargetDetonationTime);
+        Collider e = scanForEnemy();
+        if (e == null)
+        {
+            missedTarget = true;
+            Explode();
+        }
+        else
+        {
+            target = e.transform.position;
+            SearchingTarget = false;
+        }
     }
 
-    IEnumerator missTargetDetonation()
+    void DetectFlares()
     {
-        missedTarget = true;
-        yield return new WaitForSeconds(missTargetDetonationTime);
-        missileParticles.Stop();
-        Explode();
+        if (!flared)
+        {
+            Collider[] flares = Physics.OverlapSphere(transform.position, range, flareLayer);
+            flared = flares.Length > 0;
+            missedTarget = flared;
+        }
     }
 
     void Explode()
     {
+        missileParticles.Stop();
         exploded = true;
         ParticleSystem exp = Instantiate(explosionParticles, transform);
         exp.transform.parent = null;
