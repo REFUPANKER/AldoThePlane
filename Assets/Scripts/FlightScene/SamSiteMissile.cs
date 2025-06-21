@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class SamSiteMissile : MonoBehaviour
 {
+    public GameObject RadarPointer;
     public ParticleSystem missileParticles;
     public ParticleSystem explosionParticles;
     public LayerMask planeLayer;
@@ -33,6 +34,7 @@ public class SamSiteMissile : MonoBehaviour
 
     public void Fire(Vector3 t)
     {
+        RadarPointer.SetActive(true);
         missileParticles.Play();
         fired = true;
         transform.parent = null;
@@ -46,6 +48,10 @@ public class SamSiteMissile : MonoBehaviour
         landedUp = true;
     }
 
+    void Start()
+    {
+        RadarPointer.SetActive(false);
+    }
     void Update()
     {
         if (exploded || !fired) { return; }
@@ -64,6 +70,8 @@ public class SamSiteMissile : MonoBehaviour
         }
         transform.position += transform.forward * speed * Time.deltaTime;
         speed = Math.Clamp(speed + speedMultiplier, 0, maxSpeed);
+        RadarPointer.transform.position = transform.position;
+        RadarPointer.transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, 0);
     }
 
 
@@ -122,6 +130,7 @@ public class SamSiteMissile : MonoBehaviour
         ParticleSystem exp = Instantiate(explosionParticles, transform);
         exp.transform.parent = null;
         exp.Play();
+        Destroy(RadarPointer.gameObject);
         Destroy(gameObject);
     }
 }

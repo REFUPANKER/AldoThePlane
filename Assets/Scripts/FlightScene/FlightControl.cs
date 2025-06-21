@@ -35,7 +35,6 @@ public class FlightControl : MonoBehaviour
 
     void Update()
     {
-
         if (canMove)
         {
             transform.position += transform.forward * forwardSpeed * Time.deltaTime;
@@ -88,6 +87,7 @@ public class FlightControl : MonoBehaviour
         Cursor.visible = paused;
         Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
         canMove = !canMove;
+        Time.timeScale = paused ? 0 : 1;
     }
 
     IEnumerator reactivateFlares()

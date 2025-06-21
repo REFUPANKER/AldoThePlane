@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SamSite : MonoBehaviour
@@ -37,11 +38,11 @@ public class SamSite : MonoBehaviour
             if (missiles[i] != null)
             {
                 missiles[i].Fire(t);
-                missiles.RemoveAt(i);
                 break;
             }
         }
     }
+    
     IEnumerator fireCooldown()
     {
         CanFire = false;
