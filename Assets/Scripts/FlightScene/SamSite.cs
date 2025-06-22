@@ -6,7 +6,7 @@ using UnityEngine;
 public class SamSite : MonoBehaviour
 {
     public LayerMask planeLayermask;
-    public float range = 100;
+    public float radius = 100;
     public bool CanFire = true;
     public float FireCooldown = 5;
     public List<SamSiteMissile> missiles;
@@ -17,7 +17,7 @@ public class SamSite : MonoBehaviour
         {
             this.enabled = false;
         }
-        Collider[] cols = Physics.OverlapSphere(transform.position, range, planeLayermask);
+        Collider[] cols = Physics.OverlapSphere(transform.position, radius, planeLayermask);
         if (cols.Length > 0)
         {
             Vector3 dir = cols[0].transform.position - transform.position;

@@ -27,13 +27,15 @@ public class FlightControl : MonoBehaviour
     public Color[] flareStatusColors;
     bool canFlare = true;
 
+    public Transform MapCam;
     void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void Update()
+
+    void FixedUpdate()
     {
         if (canMove)
         {
@@ -51,8 +53,12 @@ public class FlightControl : MonoBehaviour
             }
             transform.Rotate(pitchInput * pitchSpeed * Time.deltaTime, 0, 0, Space.Self);
             transform.Rotate(0, 0, -yawInput * yawSpeed * Time.deltaTime, Space.Self);
-        }
 
+            MapCam.position = new Vector3(transform.position.x, MapCam.position.y, transform.position.z);
+        }
+    }
+    void Update()
+    {
         #region Attacking
         if (Input.GetKeyDown(KeyCode.Space) && !isAttacking)
         {

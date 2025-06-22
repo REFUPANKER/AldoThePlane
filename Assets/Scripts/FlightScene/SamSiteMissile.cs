@@ -52,7 +52,19 @@ public class SamSiteMissile : MonoBehaviour
     {
         RadarPointer.SetActive(false);
     }
+
     void Update()
+    {
+        if (exploded || !fired) { return; }
+        DetectFlares();
+        SearchTarget();
+        if (!flared || !missedTarget)
+        {
+            if (Vector3.Distance(transform.position, target) < detonationRange) { Explode(); }
+        }
+    }
+
+    void FixedUpdate()
     {
         if (exploded || !fired) { return; }
         if (!landedUp)
@@ -60,13 +72,10 @@ public class SamSiteMissile : MonoBehaviour
             transform.position += transform.forward * landupSpeed * Time.deltaTime;
             return;
         }
-        DetectFlares();
-        SearchTarget();
         if (!flared || !missedTarget)
         {
             Quaternion lookRotation = Quaternion.LookRotation((target - transform.position).normalized);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, turnSpeed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, target) < detonationRange) { Explode(); }
         }
         transform.position += transform.forward * speed * Time.deltaTime;
         speed = Math.Clamp(speed + speedMultiplier, 0, maxSpeed);
