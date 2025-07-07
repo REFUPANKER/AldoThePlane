@@ -28,12 +28,27 @@ public class FlightControl : MonoBehaviour
     bool canFlare = true;
 
     public Transform MapCam;
+
+    public GameObject[] PovCams;
+    public int ActivePovCamIndex = 0;
+    public KeyCode SwitchCamKey = KeyCode.C;
+
     void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        // setup pov cams 
+        for (int i = 0; i < PovCams.Length; i++) { PovCams[i].SetActive(i == ActivePovCamIndex); }
     }
 
+    void SwitchPovCam()
+    {
+        ActivePovCamIndex = ActivePovCamIndex + 1 >= PovCams.Length ? 0 : ActivePovCamIndex + 1;
+        for (int i = 0; i < PovCams.Length; i++)
+        {
+            PovCams[i].SetActive(i == ActivePovCamIndex);
+        }
+    }
 
     void FixedUpdate()
     {
@@ -81,6 +96,10 @@ public class FlightControl : MonoBehaviour
         }
         #endregion
 
+        if (Input.GetKeyDown(SwitchCamKey))
+        {
+            SwitchPovCam();
+        }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
