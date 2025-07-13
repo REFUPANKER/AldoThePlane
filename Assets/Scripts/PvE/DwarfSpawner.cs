@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class DwarfSpawner : MonoBehaviour
 {
+    public bool CanSpawn = true;
     public Transform parent;
     public ParticleSystem particles;
     public float SpawnCooldown = 5;
@@ -28,7 +29,7 @@ public class DwarfSpawner : MonoBehaviour
             yield return new WaitForSeconds(WaitBetweenSpawns + Random.Range(-spawnningNoise, spawnningNoise));
         }
 
-        StartCoroutine(ReActivate());
+        if (CanSpawn) { StartCoroutine(ReActivate()); }
     }
 
     IEnumerator ReActivate()

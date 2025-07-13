@@ -19,6 +19,22 @@ public class AiDwarf : MonoBehaviour
     public Transform target;
     public Collider[] cols;
 
+    public bool CanMove = true;
+    public void ChangeMovementStatus(bool stop)
+    {
+        if (stop == true)
+        {
+            agent.isStopped = true;
+            CanMove = false;
+            anims.SetFloat("velocity", 0);
+        }
+        else
+        {
+            agent.isStopped = false;
+            CanMove = true;
+        }
+    }
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -26,8 +42,9 @@ public class AiDwarf : MonoBehaviour
         BackToTower();
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        if (!CanMove) { return; }
         cols = Physics.OverlapSphere(transform.position, enemyDetectionDistance, EnemyLayer);
         if (cols.Length > 0)
         {
@@ -48,14 +65,12 @@ public class AiDwarf : MonoBehaviour
             BackToTower();
         }
         anims.SetFloat("velocity", agent.velocity.magnitude);
-    }
-    void LateUpdate()
-    {
         if (target != null && Vector3.Distance(transform.position, target.position) <= agent.stoppingDistance)
         {
             Attack();
         }
     }
+
     void Attack()
     {
         if (!canAttack) { return; }
