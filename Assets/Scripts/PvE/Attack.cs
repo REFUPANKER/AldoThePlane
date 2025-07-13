@@ -12,7 +12,7 @@ public class Attack : MonoBehaviour
     [SerializeField] private Animator anims;
     [SerializeField] private Transform cam;
     [SerializeField] private float raycastDistance = 10f;
-    [SerializeField] private float damage = 15;
+    public float damage = 15;
 
     [SerializeField] private GameObject lastTarget;
 

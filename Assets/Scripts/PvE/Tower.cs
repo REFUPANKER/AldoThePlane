@@ -32,6 +32,10 @@ public class Tower : MonoBehaviour
     public float Health;
     public Slider healthbar;
 
+    [Header("Tower down")]
+    public ParticleSystem towerExplodedParticles;
+    public GameStatusManager gsm;
+
     void Start()
     {
         healthbar.maxValue = Health;
@@ -100,7 +104,14 @@ public class Tower : MonoBehaviour
         healthbar.value = Health;
         if (Health <= 0)
         {
-            Debug.Log("TOWER DOWN !!!");
+            gsm.TowerDown(this);
         }
+    }
+
+    public void TowerExplosion()
+    {
+        towerExplodedParticles.Play();
+        towerExplodedParticles.transform.parent = null;
+        Destroy(gameObject);
     }
 }

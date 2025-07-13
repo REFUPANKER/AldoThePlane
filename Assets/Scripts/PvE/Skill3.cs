@@ -19,6 +19,7 @@ public class Skill3 : SkillTemplate
     private Vector3 lastPoint;
     public bool TargetSelected = false;
     public Movement player;
+    public Attack attack;
 
     [Header("Morph")]
     public GameObject playerObj;
@@ -146,7 +147,7 @@ public class Skill3 : SkillTemplate
                     damageSphere.Play(true);
                     if (target != null)
                     {
-                        target.TakeDamage(Damage + dSkill1.DamageStack + (FlightSpeed / 2));
+                        target.TakeDamage(attack.damage + Damage + dSkill1.DamageStack + (FlightSpeed / 2));
                     }
                     groundHitParticles.Play();
                     InAirState = 3;

@@ -11,17 +11,21 @@ public class HealthManager : MonoBehaviour
     public Vector3 pos;
     [Header("Health")]
     public float health = 100;
-    public float dhealth;
+    private float dhealth;
     public Slider healthbar;
     public bool DestroyAfterDeath = true;
+    public bool DeathIsHandled = false;
     public delegate void OnTakekDamage();
     public event OnTakekDamage OnTakeDamage;
+    public delegate void OnDeath();
+    public event OnDeath OnDied;
 
     [Header("Rotate ui to camera")]
     public Transform cam;
     public Transform ui;
     void Start()
     {
+        dhealth = health;
         cam = Camera.main.transform;
         healthbar.maxValue = health;
         healthbar.value = health;
@@ -51,14 +55,24 @@ public class HealthManager : MonoBehaviour
         }
         else
         {
-            if (DestroyAfterDeath)
+            OnDied?.Invoke();
+            if (!DeathIsHandled)
             {
-                Destroy(gameObject);
-            }
-            else
-            {
-                gameObject.SetActive(false);
+                if (DestroyAfterDeath)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    gameObject.SetActive(false);
+                }
             }
         }
+    }
+
+    public void Respawn()
+    {
+        health = dhealth;
+        healthbar.value = health;
     }
 }

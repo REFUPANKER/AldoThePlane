@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +63,7 @@ public class FlightAlertController : MonoBehaviour
             {
                 GameObject instImg = Instantiate(getImg, radarItemsHolder);
                 instImg.SetActive(true);
-                instImg.transform.rotation = Quaternion.Euler(-90, cols[i].transform.rotation.eulerAngles.y, 0f);
+                instImg.transform.rotation = Quaternion.Euler(-90, 0, Math.Abs(cols[i].transform.rotation.eulerAngles.y) - 180);
                 instImg.transform.position = new Vector3(cols[i].transform.position.x, radarObjectsAltitude, cols[i].transform.position.z);
             }
         }

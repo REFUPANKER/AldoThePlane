@@ -7,6 +7,7 @@ public class Skill1 : SkillTemplate
 {
     public LayerMask team2Layer;
     public Movement player;
+    public Attack attack;
     public Transform cam;
     public float attackDistance = 10f;
 
@@ -95,7 +96,7 @@ public class Skill1 : SkillTemplate
     {
         if (e != null)
         {
-            e.TakeDamage(Damage + DamageStack);
+            e.TakeDamage(attack.damage + Damage + DamageStack);
             switch (e.variation)
             {
                 case Variation.Dwarf:

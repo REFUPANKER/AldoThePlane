@@ -2,6 +2,7 @@ using System.Collections;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class FlightControl : MonoBehaviour
@@ -33,10 +34,13 @@ public class FlightControl : MonoBehaviour
     public int ActivePovCamIndex = 0;
     public KeyCode SwitchCamKey = KeyCode.C;
 
+    public GameObject PauseMenuCanvas;
+
     void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        PauseMenuCanvas.SetActive(false);
         // setup pov cams 
         for (int i = 0; i < PovCams.Length; i++) { PovCams[i].SetActive(i == ActivePovCamIndex); }
     }
@@ -113,6 +117,20 @@ public class FlightControl : MonoBehaviour
         Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
         canMove = !canMove;
         Time.timeScale = paused ? 0 : 1;
+        PauseMenuCanvas.SetActive(paused);
+    }
+
+    public void ChangeScene(string sceneName)
+    {
+        if (sceneName == "Exit")
+        {
+            Application.Quit();
+        }
+        else
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(sceneName);
+        }
     }
 
     IEnumerator reactivateFlares()

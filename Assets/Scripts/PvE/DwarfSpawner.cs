@@ -8,7 +8,8 @@ public class DwarfSpawner : MonoBehaviour
     public float SpawnCooldown = 5;
     public float WaitBetweenSpawns = 0.2f;
     public GameObject[] dwarfs;
-    
+    public float spawnningNoise = 0.4f;
+
     void Start()
     {
         StartCoroutine(SpawnDwarfs());
@@ -23,7 +24,8 @@ public class DwarfSpawner : MonoBehaviour
         {
             GameObject newDwarf = Instantiate(dwarfs[spawningIndex], transform.position, Quaternion.identity, parent);
             newDwarf.SetActive(true);
-            yield return new WaitForSeconds(WaitBetweenSpawns);
+            newDwarf.transform.Translate(Random.Range(-spawnningNoise, spawnningNoise), 0, 0);
+            yield return new WaitForSeconds(WaitBetweenSpawns + Random.Range(-spawnningNoise, spawnningNoise));
         }
 
         StartCoroutine(ReActivate());
