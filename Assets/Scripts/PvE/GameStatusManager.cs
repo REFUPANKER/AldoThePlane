@@ -38,8 +38,8 @@ public class GameStatusManager : MonoBehaviour
 
     public bool AllTowersDown(string TeamPointer)
     {
-        Tower findT = Towers.Where(i => i != null && i.name.Contains(TeamPointer.ToUpper())).FirstOrDefault();
-        return findT == null;
+        Tower[] findT = Towers.Where(i => i != null && i.name.Contains(TeamPointer.ToUpper())).ToArray();
+        return findT.Length - 1 <= 0;
     }
 
     void Start()
@@ -51,8 +51,9 @@ public class GameStatusManager : MonoBehaviour
     void GameIsEnded(string Winner)
     {
         Time.timeScale = 0;
-        // stop game (spawners)
         GameEndedScreen.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         if (Winner == "T1")
         {
             VictoryScreen.SetActive(true);
@@ -64,6 +65,14 @@ public class GameStatusManager : MonoBehaviour
     }
     public void LoadScene(string name)
     {
-        SceneManager.LoadScene(name);
+        if (name == "Exit")
+        {
+            Application.Quit();
+        }
+        else
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(name);
+        }
     }
 }

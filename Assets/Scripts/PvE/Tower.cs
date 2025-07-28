@@ -35,6 +35,7 @@ public class Tower : MonoBehaviour
     [Header("Tower down")]
     public ParticleSystem towerExplodedParticles;
     public GameStatusManager gsm;
+    public bool Destroyed = false;
 
     void Start()
     {
@@ -102,9 +103,10 @@ public class Tower : MonoBehaviour
     {
         Health -= damage;
         healthbar.value = Health;
-        if (Health <= 0)
+        if (Health <= 0 && !Destroyed)
         {
             gsm.TowerDown(this);
+            Destroyed = true;
         }
     }
 

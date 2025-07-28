@@ -34,6 +34,7 @@ public class Hero_MashaMovement : MonoBehaviour
     [Header("Towers Holder")]
     public Transform towers;
     public Transform selfBaseTower;
+    private Vector3 selfBaseTowerPos;
 
     [Header("Targetting")]
     public Transform target;
@@ -64,6 +65,8 @@ public class Hero_MashaMovement : MonoBehaviour
         BackToTower();
 
         UiRespawnIcon.SetActive(false);
+
+        selfBaseTowerPos = selfBaseTower.position;
     }
 
     float escapeStart = 0f;
@@ -112,7 +115,7 @@ public class Hero_MashaMovement : MonoBehaviour
                     {
                         Escaping = false;
                     }
-                    agent.SetDestination(selfBaseTower.position);
+                    agent.SetDestination(selfBaseTowerPos);
                 }
                 else
                 {

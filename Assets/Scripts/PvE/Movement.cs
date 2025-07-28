@@ -22,6 +22,7 @@ public class Movement : MonoBehaviour
     public Vector3 velocity;
     private bool isGrounded;
 
+    public GameObject PausedScreen;
     private bool isPaused = false;
 
     [Header("Camera")]
@@ -170,6 +171,7 @@ public class Movement : MonoBehaviour
     private void TogglePause()
     {
         isPaused = !isPaused;
+        PausedScreen.SetActive(isPaused);
         Cursor.lockState = isPaused ? CursorLockMode.None : (InFpsCam ? CursorLockMode.Locked : CursorLockMode.None);
         Cursor.visible = isPaused ? true : (InFpsCam ? false : true);
         Time.timeScale = isPaused ? 0 : 1;
